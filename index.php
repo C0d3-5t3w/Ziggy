@@ -43,7 +43,7 @@ header("timezone: PMT");
             <h2 class="section-title">What Makes Ziggy Special</h2>
             <div class="card-container">
                 <div class="card">
-                    <img src="assets/images/z2.png" alt="Ziggy playing">
+                    <img src="assets/images/z7.png" alt="Ziggy playing">
                     <div class="card-content">
                         <h3 class="card-title">Playful Spirit</h3>
                         <p>Ziggy loves to chase toys and pounce on anything that moves.</p>
@@ -51,7 +51,7 @@ header("timezone: PMT");
                 </div>
                 
                 <div class="card">
-                    <img src="assets/images/z3.png" alt="Ziggy napping">
+                    <img src="assets/images/z10.png" alt="Ziggy napping">
                     <div class="card-content">
                         <h3 class="card-title">Nap Master</h3>
                         <p>Finding the sunniest spots for the perfect cat nap is Ziggy's specialty.</p>
@@ -84,8 +84,6 @@ header("timezone: PMT");
                 <li><a href="index.html">Home</a></li>
                 <li><a href="pages/about.html">About</a></li>
                 <li><a href="pages/pictures.html">Pictures</a></li>
-                <li><a href="pages/videos.html">Videos</a></li>
-                <li><a href="pages/places.html">Places</a></li>
             </ul>
         </div>
     </footer>

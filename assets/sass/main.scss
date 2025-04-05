@@ -96,10 +96,14 @@ header {
 }
 
 .hero-img {
-  width: 100%;
-  max-width: 500px;
-  border-radius: 10px;
+  width: 150px;
+  height: 150px;
+  max-width: 100%;
+  border-radius: 50%;
+  object-fit: cover;
   box-shadow: var(--shadow);
+  margin: 0 auto;
+  display: block;
 }
 
 .section {

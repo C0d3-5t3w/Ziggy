@@ -7,7 +7,7 @@ header("timezone: PMT");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ziggy's Pictures - Cat Gallery</title>
+    <title>Ziggy's Pictures</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="../assets/css/main.css">
     <script src="../assets/js/main.js" defer></script>
@@ -39,26 +39,26 @@ header("timezone: PMT");
     
     <section class="section">
         <div class="container">
-            <h2 class="section-title">Pawsome Portraits</h2>
+            <h2 class="section-title"></h2>
             
             <div class="gallery">
                 <div class="gallery-item">
-                    <img src="../assets/images/z6.png" alt="Ziggy portrait">
+                    <img src="../assets/images/z6.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z7.png" alt="Ziggy playing">
+                    <img src="../assets/images/z7.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z8.png" alt="Ziggy sleeping">
+                    <img src="../assets/images/z8.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z9.png" alt="Ziggy in a box">
+                    <img src="../assets/images/z9.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z10.png" alt="Ziggy looking out window">
+                    <img src="../assets/images/z10.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z11.png" alt="Ziggy being curious">
+                    <img src="../assets/images/z11.png" alt="">
                 </div>
             </div>
         </div>
@@ -66,66 +66,36 @@ header("timezone: PMT");
     
     <section class="section" style="background-color: #f0f0f0;">
         <div class="container">
-            <h2 class="section-title">Ziggy's Adventures</h2>
+            <h2 class="section-title"></h2>
             
             <div class="gallery">
                 <div class="gallery-item">
-                    <img src="../assets/images/z12.png" alt="Ziggy outdoors">
+                    <img src="../assets/images/z12.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z13.png" alt="Ziggy exploring">
+                    <img src="../assets/images/z13.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z14.png" alt="Ziggy on furniture">
+                    <img src="../assets/images/z14.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z15.png" alt="Ziggy with toys">
+                    <img src="../assets/images/z15.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z16.png" alt="Ziggy on adventure">
+                    <img src="../assets/images/z16.png" alt="">
                 </div>
                 <div class="gallery-item">
-                    <img src="../assets/images/z17.png" alt="Ziggy with friends">
+                    <img src="../assets/images/z17.png" alt="">
                 </div>
             </div>
         </div>
     </section>
-    
-    <section class="section">
-        <div class="container">
-            <h2 class="section-title">Silly Moments</h2>
-            
-            <div class="gallery">
-                <div class="gallery-item">
-                    <img src="https://placekitten.com/620/620" alt="Ziggy being silly">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://placekitten.com/621/621" alt="Ziggy making funny face">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://placekitten.com/622/622" alt="Ziggy in costume">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://placekitten.com/623/623" alt="Ziggy caught mid-action">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://placekitten.com/624/624" alt="Ziggy derpy moment">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://placekitten.com/625/625" alt="Ziggy playing with paper">
-                </div>
-            </div>
-        </div>
-    </section>
-    
     <footer>
         <div class="container">
             <ul class="footer-links">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="pictures.html">Pictures</a></li>
-                <li><a href="videos.html">Videos</a></li>
-                <li><a href="places.html">Places</a></li>
             </ul>
         </div>
     </footer>

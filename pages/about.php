@@ -7,7 +7,7 @@ header("timezone: PMT");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Ziggy - Cat Extraordinaire</title>
+    <title>About Ziggy</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="../assets/css/main.css">
     <script src="../assets/js/main.js" defer></script>
@@ -117,8 +117,6 @@ header("timezone: PMT");
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="pictures.html">Pictures</a></li>
-                <li><a href="videos.html">Videos</a></li>
-                <li><a href="places.html">Places</a></li>
             </ul>
         </div>
     </footer>
