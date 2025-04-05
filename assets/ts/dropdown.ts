@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const dropdowns = document.querySelectorAll('.dropdown-trigger');
+    const dropdowns: NodeListOf<HTMLElement> = document.querySelectorAll('.dropdown-trigger');
     
     dropdowns.forEach(dropdown => {
         dropdown.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            const content = this.nextElementSibling;
+            const content = this.nextElementSibling as HTMLElement;
+            if (!content) return;
             
             document.querySelectorAll('.dropdown-content').forEach(item => {
                 if (item !== content && item.classList.contains('show')) {
