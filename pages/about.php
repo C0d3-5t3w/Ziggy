@@ -45,15 +45,15 @@ header("timezone: PMT");
                 </div>
                 <div style="flex: 2; min-width: 300px;">
                     <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Ziggy's Story</h2>
-                    <p>Ziggy joined our family in 2020 and has been bringing joy and mischief ever since. With striking orange fur and emerald green eyes, Ziggy is as beautiful as they are playful.</p>
+                    <p>Ziggy is amazing!</p>
                     
                     <h3 style="color: var(--accent-color); margin: 1.5rem 0 0.5rem;">Quick Facts:</h3>
                     <ul style="list-style-type: none; padding-left: 0;">
-                        <li>🐱 <strong>Breed:</strong> Domestic Shorthair</li>
-                        <li>🎂 <strong>Birthday:</strong> March 15, 2020</li>
-                        <li>🍗 <strong>Favorite Food:</strong> Tuna Treats</li>
-                        <li>🧶 <strong>Favorite Toy:</strong> Feather Wand</li>
-                        <li>😴 <strong>Favorite Nap Spot:</strong> Sunny Windowsill</li>
+                        <li>🐱 <strong>Breed:</strong> Nebelung</li>
+                        <li>🎂 <strong>Birthday:</strong> */*/2023</li>
+                        <li>🍗 <strong>Favorite Food:</strong> Gravy Treats</li>
+                        <li>🧶 <strong>Favorite Toy:</strong> Gray roadkill mouse</li>
+                        <li>😴 <strong>Favorite Nap Spot:</strong> Bed or cat tree</li>
                     </ul>
                 </div>
             </div>
@@ -67,21 +67,21 @@ header("timezone: PMT");
                 <div class="card">
                     <div class="card-content">
                         <h3 class="card-title">Playful</h3>
-                        <p>Ziggy can turn any object into a toy and play for hours. From bottle caps to paper bags, everything is a potential source of entertainment.</p>
+                        <p>Ziggy can turn any object into a toy, everything is a potential source of entertainment.</p>
                     </div>
                 </div>
                 
                 <div class="card">
                     <div class="card-content">
                         <h3 class="card-title">Affectionate</h3>
-                        <p>When Ziggy wants attention, expect lots of purring, head bumps, and cuddles. Nothing beats a movie night with Ziggy on your lap.</p>
+                        <p>When Ziggy wants attention, expect lots of meowing, purring, head bumps, and cuddles.</p>
                     </div>
                 </div>
                 
                 <div class="card">
                     <div class="card-content">
                         <h3 class="card-title">Intelligent</h3>
-                        <p>Ziggy has figured out how to open cabinet doors and knows exactly when it's feeding time. This cat is always one step ahead!</p>
+                        <p>Ziggy knows exactly when it's feeding time.</p>
                     </div>
                 </div>
             </div>
@@ -95,17 +95,17 @@ header("timezone: PMT");
                 <p style="margin-bottom: 2rem;">Ever wondered what Ziggy does all day? Here's a typical schedule:</p>
                 
                 <div style="text-align: left; background: white; padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
-                    <p><strong>5:30 AM</strong> - Wake up humans for breakfast</p>
-                    <p><strong>6:00 AM</strong> - Eat breakfast and then sprint around the house</p>
-                    <p><strong>8:00 AM</strong> - First nap of the day in the sunny spot</p>
+                    <p><strong>4:30 AM</strong> - Wake up humans for breakfast</p>
+                    <p><strong>5:00 AM</strong> - Eat breakfast</p>
+                    <p><strong>8:00 AM</strong> - First nap of the day</p>
                     <p><strong>11:00 AM</strong> - Bird watching at the window</p>
-                    <p><strong>1:00 PM</strong> - Lunch followed by grooming session</p>
+                    <p><strong>1:00 PM</strong> - Lunch time</p>
                     <p><strong>2:00 PM</strong> - Afternoon nap (very important)</p>
                     <p><strong>5:00 PM</strong> - Wake up and demand dinner</p>
                     <p><strong>6:00 PM</strong> - Play time with favorite toys</p>
                     <p><strong>8:00 PM</strong> - Cuddle time with humans</p>
                     <p><strong>10:00 PM</strong> - Night patrol of the house</p>
-                    <p><strong>3:00 AM</strong> - Random zoomies for no apparent reason</p>
+                    <p><strong>3:00 AM</strong> - Wake up humans for breakfast</p>
                 </div>
             </div>
         </div>

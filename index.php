@@ -33,7 +33,7 @@ header("timezone: PMT");
     <section class="hero">
         <div class="container">
             <h1>Meet Ziggy!</h1>
-            <p>Welcome to the official website of Ziggy, the most charming feline you'll ever meet. Explore Ziggy's life, adventures, and adorable moments!</p>
+            <p>Welcome to the official website of Ziggy!</p>
             <img src="assets/images/z1.png" alt="Ziggy the Cat" class="hero-img">
         </div>
     </section>
