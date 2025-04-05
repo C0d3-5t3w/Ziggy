@@ -29,7 +29,7 @@ header("timezone: PMT");
                 <li class="nav-item"><a href="pages/about.html" class="nav-link">About</a></li>
                 <li class="nav-item"><a href="pages/pictures.html" class="nav-link">Pictures</a></li>
                 <li class="nav-item"><a href="pages/FlappyZig.html" class="nav-link">Flappy Zig</a></li>
-                <li class="nav-item"><a href="pages/Znek.html" class="nav-link">Znek</a></li>
+                <li class="nav-item"><a href="pages/znek.html" class="nav-link">Znek</a></li>
             </ul>
         </div>
     </header>

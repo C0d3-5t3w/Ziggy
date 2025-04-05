@@ -409,11 +409,11 @@ header("timezone: PMT");
     <footer>
         <div class="container">
             <ul class="footer-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="pages/about.html">About</a></li>
-                <li><a href="pages/pictures.html">Pictures</a></li>
-                <li><a href="pages/FlappyZig.html">Flappy Zig</a></li>
-                <li><a href="pages/znek.html">Znek</a></li>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="pictures.html">Pictures</a></li>
+                <li><a href="FlappyZig.html">Flappy Zig</a></li>
+                <li><a href="znek.html">Znek</a></li>
             </ul>
         </div>
     </footer>
