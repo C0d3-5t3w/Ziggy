@@ -98,7 +98,7 @@ header("timezone: PMT");
             <div style="max-width: 800px; margin: 0 auto;">
                 <p style="margin-bottom: 2rem;">Ever wondered what Ziggy does all day? Here's a typical schedule:</p>
                 
-                <div style="text-align: left; background: white; padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
+                <div style="text-align: left; color: black; background: white; padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
                     <p><strong>4:30 AM</strong> - Wake up humans for breakfast</p>
                     <p><strong>5:00 AM</strong> - Eat breakfast</p>
                     <p><strong>8:00 AM</strong> - First nap of the day</p>
