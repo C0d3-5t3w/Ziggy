@@ -1,10 +1,12 @@
 :root {
-  --primary-color: #be0000;
-  --secondary-color: #4a4a4a;
-  --background-color: #000000;
-  --text-color: #ffffff;
-  --accent-color: #9e76b4;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --primary-color: #ff3333; 
+  --secondary-color: #4CAF50;
+  --background-color: #121212;
+  --text-color: #ffffff; 
+  --accent-color: #b967ff;
+  --orange-color: #ff9800;
+  --card-bg-color: #1e1e1e;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -28,7 +30,7 @@ body {
 }
 
 header {
-  background-color: white;
+  background-color: #1a1a1a;
   box-shadow: var(--shadow);
   position: sticky;
   top: 0;
@@ -63,14 +65,14 @@ header {
 }
 
 .nav-link {
-  color: var(--secondary-color);
+  color: #e0e0e0;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s;
 }
 
 .nav-link:hover, .nav-link.active {
-  color: var(--primary-color);
+  color: var(--orange-color);
 }
 
 .hamburger {
@@ -113,7 +115,7 @@ header {
 .section-title {
   text-align: center;
   margin-bottom: 3rem;
-  color: var(--primary-color);
+  color: var(--accent-color);
   font-size: 2.2rem;
 }
 
@@ -124,7 +126,7 @@ header {
 }
 
 .card {
-  background: white;
+  background: var(--card-bg-color);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -147,7 +149,7 @@ header {
 
 .card-title {
   margin-bottom: 0.5rem;
-  color: var(--accent-color);
+  color: var(--secondary-color);
 }
 
 .btn {
@@ -164,7 +166,7 @@ header {
 }
 
 .btn:hover {
-  background-color: var(--accent-color);
+  background-color: var(--orange-color);
   transform: scale(1.05);
 }
 
@@ -181,7 +183,7 @@ header {
 }
 
 footer {
-  background-color: var(--secondary-color);
+  background-color: #1a1a1a;
   color: white;
   padding: 2rem 0;
   text-align: center;
@@ -233,7 +235,7 @@ footer {
     left: -100%;
     top: 70px;
     flex-direction: column;
-    background-color: white;
+    background-color: #1a1a1a;
     width: 100%;
     text-align: center;
     transition: 0.3s;
