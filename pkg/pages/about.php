@@ -18,14 +18,14 @@ header("timezone: PMT");
 <body>
     <header>
         <div class="container nav-container">
-            <a href="../index.html" class="logo">ZIGGY<span>!</span></a>
+            <a href="../../index.html" class="logo">ZIGGY<span>!</span></a>
             
             <div class="hamburger">
                 <span>☰</span>
             </div>
             
             <ul class="nav-menu">
-                <li class="nav-item"><a href="../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
                 <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
                 <li class="nav-item"><a href="pictures.html" class="nav-link">Pictures</a></li>
                 <li class="nav-item"><a href="FlappyZig.html" class="nav-link">Flappy Zig</a></li>
@@ -118,7 +118,7 @@ header("timezone: PMT");
     <footer>
         <div class="container">
             <ul class="footer-links">
-                <li><a href="../index.html">Home</a></li>
+                <li><a href="../../index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="pictures.html">Pictures</a></li>
                 <li><a href="FlappyZig.html">Flappy Zig</a></li>

@@ -11,9 +11,9 @@ header("timezone: PMT");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ziggy</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="assets/css/main.css">
-    <script src="assets/js/main.js" defer></script>
-    <script src="assets/js/dropdown.js" defer></script>
+    <link rel="stylesheet" href="pkg/pkg/assets/css/main.css">
+    <script src="pkg/assets/js/main.js" defer></script>
+    <script src="pkg/assets/js/dropdown.js" defer></script>
 </head>
 <body>
     <header>
@@ -26,10 +26,10 @@ header("timezone: PMT");
             
             <ul class="nav-menu">
                 <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
-                <li class="nav-item"><a href="pages/about.html" class="nav-link">About</a></li>
-                <li class="nav-item"><a href="pages/pictures.html" class="nav-link">Pictures</a></li>
-                <li class="nav-item"><a href="pages/FlappyZig.html" class="nav-link">Flappy Zig</a></li>
-                <li class="nav-item"><a href="pages/znek.html" class="nav-link">Znek</a></li>
+                <li class="nav-item"><a href="pkg/pages/about.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="pkg/pages/pictures.html" class="nav-link">Pictures</a></li>
+                <li class="nav-item"><a href="pkg/pages/FlappyZig.html" class="nav-link">Flappy Zig</a></li>
+                <li class="nav-item"><a href="pkg/pages/znek.html" class="nav-link">Znek</a></li>
             </ul>
         </div>
     </header>
@@ -38,7 +38,7 @@ header("timezone: PMT");
         <div class="container">
             <h1>Meet Ziggy!</h1>
             <p>Welcome to the official website of Ziggy!</p>
-            <img src="assets/images/z1.png" alt="Ziggy the Cat" class="hero-img">
+            <img src="pkg/assets/images/z1.png" alt="Ziggy the Cat" class="hero-img">
         </div>
     </section>
     
@@ -47,7 +47,7 @@ header("timezone: PMT");
             <h2 class="section-title">What Makes Ziggy Special</h2>
             <div class="card-container">
                 <div class="card">
-                    <img src="assets/images/z7.png" alt="Ziggy playing">
+                    <img src="pkg/assets/images/z7.png" alt="Ziggy playing">
                     <div class="card-content">
                         <h3 class="card-title">Playful Spirit</h3>
                         <p>Ziggy loves to chase toys and pounce on anything that moves.</p>
@@ -55,7 +55,7 @@ header("timezone: PMT");
                 </div>
                 
                 <div class="card">
-                    <img src="assets/images/z10.png" alt="Ziggy napping">
+                    <img src="pkg/assets/images/z10.png" alt="Ziggy napping">
                     <div class="card-content">
                         <h3 class="card-title">Nap Master</h3>
                         <p>Finding the sunniest spots for the perfect cat nap is Ziggy's specialty.</p>
@@ -63,7 +63,7 @@ header("timezone: PMT");
                 </div>
                 
                 <div class="card">
-                    <img src="assets/images/z4.png" alt="Ziggy being curious">
+                    <img src="pkg/assets/images/z4.png" alt="Ziggy being curious">
                     <div class="card-content">
                         <h3 class="card-title">Curious Explorer</h3>
                         <p>No box, bag, or shelf is safe from Ziggy's curious investigations.</p>
@@ -86,10 +86,10 @@ header("timezone: PMT");
         <div class="container">
             <ul class="footer-links">
                 <li><a href="index.html">Home</a></li>
-                <li><a href="pages/about.html">About</a></li>
-                <li><a href="pages/pictures.html">Pictures</a></li>
-                <li><a href="pages/FlappyZig.html">Flappy Zig</a></li>
-                <li><a href="pages/znek.html">Znek</a></li>
+                <li><a href="pkg/pages/about.html">About</a></li>
+                <li><a href="pkg/pages/pictures.html">Pictures</a></li>
+                <li><a href="pkg/pages/FlappyZig.html">Flappy Zig</a></li>
+                <li><a href="pkg/pages/znek.html">Znek</a></li>
             </ul>
         </div>
     </footer>
