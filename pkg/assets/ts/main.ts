@@ -83,10 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
     animateOnScroll();
     
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+        anchor.addEventListener('click', (e) => {
             e.preventDefault();
             
-            const href = this.getAttribute('href');
+            const href = anchor.getAttribute('href');
             if (href) {
                 const target = document.querySelector(href);
                 if (target) {
