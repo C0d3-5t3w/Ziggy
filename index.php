@@ -15,6 +15,7 @@ header("timezone: PMT");
     <link rel="stylesheet" href="pkg/assets/css/additions.css">
     <script src="pkg/assets/js/main.js" defer></script>
     <script src="pkg/assets/js/dropdown.js" defer></script>
+    <script src="pkg/assets/js/animations.js" defer></script>
 </head>
 <body>
     <header>
