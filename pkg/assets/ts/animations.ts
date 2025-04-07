@@ -13,6 +13,7 @@ class UIAnimator {
             this.setupImageAnimations();
             this.setupCardAnimations();
             this.setupPageTransitions();
+            this.setupCatTailTrail(); 
         });
     }
     
@@ -93,6 +94,58 @@ class UIAnimator {
             setTimeout(() => {
                 overlay.style.transform = 'translateY(-100%)';
             }, 100);
+        });
+    }
+
+    private setupCatTailTrail(): void {
+        if ('ontouchstart' in document.documentElement) return;
+        
+        const tailContainer = document.createElement('div');
+        tailContainer.className = 'cat-tail-container';
+        document.body.appendChild(tailContainer);
+        
+        const tailSegmentsCount = 10;
+        const tailSegments: HTMLElement[] = [];
+        
+        for (let i = 0; i < tailSegmentsCount; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'cat-tail-segment';
+            const hue = 25 - (i * 2);
+            const lightness = 60 - (i * 2);
+            segment.style.backgroundColor = `hsl(${hue}, 80%, ${lightness}%)`;
+            segment.style.width = `${Math.max(5, 16 - (i * 1.2))}px`;
+            segment.style.height = `${Math.max(5, 16 - (i * 1.2))}px`;
+            segment.style.zIndex = `${9995 - i}`;
+            segment.style.opacity = `${1 - (i * 0.08)}`;
+            
+            tailContainer.appendChild(segment);
+            tailSegments.push(segment);
+        }
+        
+        const positions: { x: number; y: number }[] = Array(tailSegmentsCount).fill({ x: 0, y: 0 });
+        
+        document.addEventListener('mousemove', (e) => {
+            positions.unshift({ x: e.clientX, y: e.clientY });
+            positions.pop();
+            
+            tailSegments.forEach((segment, index) => {
+                const position = positions[Math.min(index, positions.length - 1)];
+                
+                if (position) {
+                    segment.style.transform = `translate(${position.x}px, ${position.y}px)`;
+                    
+                    const prevPos = positions[Math.min(index + 1, positions.length - 1)] || position;
+                    const speed = Math.sqrt(
+                        Math.pow(position.x - prevPos.x, 2) + 
+                        Math.pow(position.y - prevPos.y, 2)
+                    );
+                    
+                    const wiggle = Math.min(10, speed * 0.2);
+                    const angle = Math.sin((Date.now() / 200) + index) * wiggle;
+                    
+                    segment.style.transform = `translate(${position.x}px, ${position.y}px) rotate(${angle}deg)`;
+                }
+            });
         });
     }
 }
