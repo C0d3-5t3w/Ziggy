@@ -54,7 +54,7 @@ header("timezone: PMT");
                     <h3 style="color: var(--accent-color); margin: 1.5rem 0 0.5rem;">Quick Facts:</h3>
                     <ul style="list-style-type: none; padding-left: 0;">
                         <li>🐱 <strong>Breed:</strong> Nebelung</li>
-                        <li>🎂 <strong>Birthday:</strong> */*/2023</li>
+                        <li>🎂 <strong>Birthday:</strong> 06/24/2023</li>
                         <li>🍗 <strong>Favorite Food:</strong> Gravy Treats</li>
                         <li>🧶 <strong>Favorite Toy:</strong> Gray roadkill mouse</li>
                         <li>😴 <strong>Favorite Nap Spot:</strong> Bed or cat tree</li>
