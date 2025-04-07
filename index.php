@@ -12,6 +12,7 @@ header("timezone: PMT");
     <title>Ziggy</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="pkg/assets/css/main.css">
+    <link rel="stylesheet" href="pkg/assets/css/additions.css">
     <script src="pkg/assets/js/main.js" defer></script>
     <script src="pkg/assets/js/dropdown.js" defer></script>
 </head>
