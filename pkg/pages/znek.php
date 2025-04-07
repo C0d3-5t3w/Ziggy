@@ -76,6 +76,7 @@ header("timezone: PMT");
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle at center, #0f1c2c, #050a14);
+            overflow: hidden;
         }
         
         .canvas {
@@ -92,6 +93,8 @@ header("timezone: PMT");
             border-radius: 10px;
             border: 2px solid rgba(0, 200, 255, 0.3);
             box-sizing: border-box;
+            max-width: 100%;
+            max-height: 100%;
         }
         
         .game-controls {
@@ -137,7 +140,7 @@ header("timezone: PMT");
         
         .game-controls.fade-out {
             opacity: 0;
-            transform: translateX(-50%) translateY(-40px);
+            transform: translate(-50%, -40px);
             pointer-events: none;
         }
         
@@ -273,12 +276,12 @@ header("timezone: PMT");
             height: 100%;
             pointer-events: none;
             z-index: 10;
-            background: 
-                linear-gradient(to bottom, 
-                    rgba(0, 20, 40, 0.3) 0%, 
-                    transparent 20%,
-                    transparent 80%,
-                    rgba(0, 20, 40, 0.3) 100%);
+            background: linear-gradient(to bottom, 
+                rgba(0, 0, 0, 0.3) 0%, 
+                transparent 10%, 
+                transparent 90%, 
+                rgba(0, 0, 0, 0.3) 100%
+            );
         }
 
         .score-display {
@@ -294,14 +297,28 @@ header("timezone: PMT");
         
         @media (min-width: 768px) {
             .d-pad-container {
-                right: 30px;
-                left: auto;
-                transform: none;
                 bottom: 30px;
+                width: 150px;
+                height: 150px;
             }
             
             .shoot-button {
-                right: -90px;
+                position: absolute;
+                width: 60px;
+                height: 60px;
+                right: -70px;
+            }
+        }
+
+        @media (orientation: landscape) {
+            .d-pad-container {
+                left: auto;
+                right: 30px;
+                transform: none;
+            }
+            
+            .shoot-button {
+                right: -70px;
             }
         }
     </style>
@@ -311,7 +328,7 @@ header("timezone: PMT");
     <div class="game-container">
         <div class="game-overlay"></div>
         <div class="canvas">
-            <canvas id="znekCanvas" width="800" height="600"></canvas>
+            <canvas id="znekCanvas"></canvas>
         </div>
         <div id="controls" class="game-controls">
             <h3>How to Play Znek</h3>
@@ -351,7 +368,7 @@ header("timezone: PMT");
                     controls.classList.add('fade-out');
                     setTimeout(() => {
                         controls.style.display = 'none';
-                    }, 400); 
+                    }, 500);
                 }
             }
 
@@ -361,24 +378,24 @@ header("timezone: PMT");
                 const direction = button.getAttribute('data-direction');
                 
                 button.addEventListener('mousedown', function(e) {
-                    hideControls();
+                    button.classList.add('active');
                     if (gameInstance) {
                         gameInstance.handleDPadInput(direction);
                     }
-                    button.classList.add('active');
+                    hideControls();
                 });
                 
-                button.addEventListener('mouseup', function() {
+                button.addEventListener('mouseup', function(e) {
                     button.classList.remove('active');
                 });
                 
                 button.addEventListener('touchstart', function(e) {
                     e.preventDefault();
-                    hideControls();
+                    button.classList.add('active');
                     if (gameInstance) {
                         gameInstance.handleDPadInput(direction);
                     }
-                    button.classList.add('active');
+                    hideControls();
                 });
                 
                 button.addEventListener('touchend', function(e) {
@@ -394,26 +411,44 @@ header("timezone: PMT");
             });
             
             try {
-                const gameModule = await import('../assets/js/Znek.js');
-                gameInstance = new gameModule.default();
-                if (gameInstance) {
-                    gameInstance.reset = gameInstance.reset || function() {
-                        location.reload();
-                    };
+                const canvas = document.getElementById('znekCanvas');
+                resizeCanvas();
+                
+                gameInstance = new Znek();
+                
+                window.addEventListener('resize', resizeCanvas);
+                
+                function resizeCanvas() {
+                    const container = document.querySelector('.canvas');
+                    const containerWidth = container.clientWidth;
+                    const containerHeight = container.clientHeight;
+                    
+                    let width, height;
+                    const aspectRatio = 4/3;
+                    
+                    if (containerWidth / containerHeight > aspectRatio) {
+                        height = containerHeight;
+                        width = height * aspectRatio;
+                    } else {
+                        width = containerWidth;
+                        height = width / aspectRatio;
+                    }
+                    
+                    canvas.width = Math.floor(width);
+                    canvas.height = Math.floor(height);
+                    
+                    if (gameInstance && gameInstance.handleResize) {
+                        gameInstance.handleResize();
+                    }
                 }
             } catch (error) {
-                console.error('Failed to load Znek game:', error);
+                console.error('Error initializing game:', error);
             }
         });
     </script>
     <footer>
         <div class="container">
             <ul class="footer-links">
-                <li><a href="../../index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="pictures.html">Pictures</a></li>
-                <li><a href="FlappyZig.html">Flappy Zig</a></li>
-                <li><a href="znek.html">Znek</a></li>
             </ul>
         </div>
     </footer>

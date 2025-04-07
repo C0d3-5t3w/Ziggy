@@ -181,9 +181,9 @@ class Znek {
         this.deathTimer = 0;
         this.canReset = false;
         this.gameStarted = false;
-        this.dpadElement = document.getElementById('znekDPad');
-        this.restartButtonElement = document.getElementById('znekRestartButton');
-        this.canvasContainer = document.getElementById('znekContainer');
+        this.dpadElement = document.querySelector('.d-pad-container');
+        this.restartButtonElement = document.getElementById('restartButton');
+        this.canvasContainer = document.querySelector('.canvas');
         this.resizeTimeout = null;
         this.showNotification = false;
         this.ghosts = [];
@@ -193,6 +193,7 @@ class Znek {
         
         this.init();
         this.setupResponsiveLayout();
+        this.handleResize(); 
         window.addEventListener('resize', this.handleResize.bind(this));
     }
 
@@ -204,11 +205,39 @@ class Znek {
             clearInterval(this.gameLoop);
         }
         
-        this.gameLoop = window.setInterval(this.update.bind(this), CONSTANTS.GAME_SPEED);
+        const isMobile = window.innerWidth <= 768;
+        const gameSpeed = isMobile ? CONSTANTS.GAME_SPEED * 1.2 : CONSTANTS.GAME_SPEED;
+        
+        this.gameLoop = window.setInterval(this.update.bind(this), gameSpeed);
         this.scheduleSpecialFood();
         this.scheduleTailEatingEvent();
         this.scheduleGhostSpawn();
-        this.setupTouchEvents(); 
+        this.setupTouchEvents();
+        
+        this.updateGameConstants();
+    }
+
+    private updateGameConstants(): void {
+        const scaleX = this.canvas.width / 800; 
+        const scaleY = this.canvas.height / 600;
+        const scale = Math.min(scaleX, scaleY);
+        
+        CONSTANTS.GRID_SIZE = Math.max(8, Math.floor(10 * scale));
+        CONSTANTS.SNAKE_HEAD_SIZE = Math.max(25, Math.floor(40 * scale));
+        CONSTANTS.SNAKE_BODY_SIZE = Math.max(10, Math.floor(16 * scale));
+        CONSTANTS.FOOD_SIZE = Math.max(20, Math.floor(30 * scale));
+        CONSTANTS.SPECIAL_FOOD_SIZE = Math.max(15, Math.floor(25 * scale));
+        CONSTANTS.GHOST_SIZE = Math.max(25, Math.floor(40 * scale));
+        CONSTANTS.BULLET_SIZE = Math.max(10, Math.floor(14 * scale));
+        
+        CONSTANTS.SCORE_POSITION_X = 20 * scale;
+        CONSTANTS.SCORE_POSITION_Y = 40 * scale;
+        CONSTANTS.HIGH_SCORE_Y_START = 120 * scale;
+        CONSTANTS.HIGH_SCORE_Y_SPACING = 30 * scale;
+        
+        CONSTANTS.SCORE_FONT = `${Math.max(16, Math.round(22 * scale))}px "Orbitron", sans-serif`;
+        CONSTANTS.GAME_OVER_FONT = `bold ${Math.max(24, Math.round(32 * scale))}px "Orbitron", sans-serif`;
+        CONSTANTS.HIGH_SCORE_FONT = `${Math.max(14, Math.round(18 * scale))}px "Play", sans-serif`;
     }
 
     private setupResponsiveLayout(): void {
@@ -231,44 +260,58 @@ class Znek {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         const canvasRect = this.canvas.getBoundingClientRect();
+        const isMobile = windowWidth <= 768;
+        const isLandscape = windowWidth > windowHeight;
         
-        const dpadSize = Math.min(
-            CONSTANTS.DPAD_SIZE,
-            (windowWidth - canvasRect.width) / 2 - CONSTANTS.DPAD_MARGIN * 2
-        );
+        const dpadSize = isMobile 
+            ? Math.min(150, windowWidth * 0.3) 
+            : Math.min(180, windowHeight * 0.25);
         
         if (this.dpadElement) {
-            const isPortrait = windowHeight > windowWidth;
-            
-            if (isPortrait) {
-                this.dpadElement.style.top = `${canvasRect.bottom + CONSTANTS.DPAD_MARGIN}px`;
-                this.dpadElement.style.left = `${(windowWidth - dpadSize) / 2}px`;
+            if (isLandscape) {
+                this.dpadElement.style.left = 'auto';
+                this.dpadElement.style.right = '20px';
+                this.dpadElement.style.bottom = '20px';
+                this.dpadElement.style.transform = 'none';
             } else {
-                this.dpadElement.style.left = `${canvasRect.right + CONSTANTS.DPAD_MARGIN}px`;
-                this.dpadElement.style.top = `${(windowHeight - dpadSize) / 2}px`;
+                this.dpadElement.style.left = '50%';
+                this.dpadElement.style.right = 'auto';
+                this.dpadElement.style.bottom = '20px';
+                this.dpadElement.style.transform = 'translateX(-50%)';
             }
             
             this.dpadElement.style.width = `${dpadSize}px`;
             this.dpadElement.style.height = `${dpadSize}px`;
             
             const buttons = this.dpadElement.querySelectorAll('.d-pad-button');
-            const buttonSize = Math.max(dpadSize / 3, CONSTANTS.DPAD_BUTTON_SIZE);
             buttons.forEach(button => {
-                (button as HTMLElement).style.width = `${buttonSize}px`;
-                (button as HTMLElement).style.height = `${buttonSize}px`;
+                (button as HTMLElement).style.fontSize = `${Math.max(16, Math.floor(dpadSize / 6))}px`;
             });
+            
+            const shootButton = this.dpadElement.querySelector('.shoot-button') as HTMLElement;
+            if (shootButton) {
+                const shootButtonSize = dpadSize * 0.4;
+                shootButton.style.width = `${shootButtonSize}px`;
+                shootButton.style.height = `${shootButtonSize}px`;
+                
+                if (isLandscape) {
+                    shootButton.style.right = `${dpadSize * 0.8}px`;
+                    shootButton.style.top = `${-shootButtonSize * 0.8}px`;
+                } else {
+                    shootButton.style.right = `${-shootButtonSize * 0.8}px`;
+                    shootButton.style.top = '50%';
+                }
+            }
         }
         
         if (this.restartButtonElement) {
             const buttonWidth = Math.min(
                 CONSTANTS.RESTART_BUTTON_WIDTH,
-                canvasRect.width - CONSTANTS.RESTART_BUTTON_MARGIN * 2
+                windowWidth * 0.3
             );
             
-            this.restartButtonElement.style.width = `${buttonWidth}px`;
-            this.restartButtonElement.style.height = `${CONSTANTS.RESTART_BUTTON_HEIGHT}px`;
-            this.restartButtonElement.style.left = `${(canvasRect.width - buttonWidth) / 2 + canvasRect.left}px`;
-            this.restartButtonElement.style.top = `${canvasRect.bottom + CONSTANTS.RESTART_BUTTON_MARGIN}px`;
+            this.restartButtonElement.style.padding = isMobile ? '8px 12px' : '10px 20px';
+            this.restartButtonElement.style.fontSize = isMobile ? '14px' : '16px';
             
             this.restartButtonElement.style.display = this.gameOver && this.canReset ? 'block' : 'none';
         }
@@ -280,7 +323,23 @@ class Znek {
         }
         
         this.resizeTimeout = window.setTimeout(() => {
+            this.updateGameConstants();
             this.updateLayout();
+            
+            if (this.food) {
+                this.food = this.generateFood();
+            }
+            if (this.specialFood) {
+                const newSpecialFood = this.generateFood();
+                this.specialFood = {
+                    x: newSpecialFood.x,
+                    y: newSpecialFood.y,
+                    timeLeft: this.specialFood.timeLeft
+                };
+            }
+            
+            this.draw();
+            
             this.resizeTimeout = null;
         }, 250);
     }
@@ -351,9 +410,12 @@ class Znek {
         let onSnake: boolean;
         
         do {
+            const maxGridX = Math.floor((this.canvas.width - CONSTANTS.GRID_SIZE) / CONSTANTS.GRID_SIZE);
+            const maxGridY = Math.floor((this.canvas.height - CONSTANTS.GRID_SIZE) / CONSTANTS.GRID_SIZE);
+            
             newFood = {
-                x: Math.floor(Math.random() * (this.canvas.width / CONSTANTS.GRID_SIZE)) * CONSTANTS.GRID_SIZE,
-                y: Math.floor(Math.random() * (this.canvas.height / CONSTANTS.GRID_SIZE)) * CONSTANTS.GRID_SIZE
+                x: Math.floor(Math.random() * maxGridX) * CONSTANTS.GRID_SIZE,
+                y: Math.floor(Math.random() * maxGridY) * CONSTANTS.GRID_SIZE
             };
             
             onSnake = this.snake.some(segment => 
@@ -694,16 +756,11 @@ class Znek {
                 case 'right': head.x += CONSTANTS.GRID_SIZE; break;
             }
 
-            if (head.x < 0 || head.x >= this.canvas.width || head.y < 0 || head.y >= this.canvas.height) {
-                if (this.gameLoop) clearInterval(this.gameLoop);
-                if (this.specialFoodTimeout) clearTimeout(this.specialFoodTimeout);
-                if (this.tailEatingEventTimeout) clearTimeout(this.tailEatingEventTimeout);
-                if (this.ghostTimeout) clearTimeout(this.ghostTimeout);
-                this.gameOver = true;
-                this.saveHighScore(this.score);
-                return;
-            }
-            
+            if (head.x < 0) head.x = this.canvas.width - CONSTANTS.GRID_SIZE;
+            if (head.x >= this.canvas.width) head.x = 0;
+            if (head.y < 0) head.y = this.canvas.height - CONSTANTS.GRID_SIZE;
+            if (head.y >= this.canvas.height) head.y = 0;
+
             if (this.hasTailEatingPower) {
                 const collisionIndex = this.snake.findIndex((segment, i) => 
                     i > 2 && segment.x === head.x && segment.y === head.y
