@@ -1,0 +1,131 @@
+.page-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--background-color);
+  z-index: 9999;
+  transform: translateY(-100%);
+  transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.page-loaded {
+  animation: fadeIn 0.8s forwards;
+}
+
+.custom-cursor {
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, border-color 0.2s, transform 0.1s;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background-color 0.2s, transform 0.15s;
+}
+
+.cursor-hover {
+  width: 50px;
+  height: 50px;
+  border-color: var(--primary-color);
+  background-color: rgba(255, 51, 51, 0.1);
+}
+
+.dot-hover {
+  width: 0;
+  opacity: 0;
+}
+
+.card.animate-in {
+  animation: fadeInUp 0.8s forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--background-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  transition: opacity 0.5s, visibility 0.5s;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 51, 51, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.gallery-item img, .card img {
+  transition: var(--transition-standard);
+  will-change: transform, filter;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 51, 51, 0.3);
+}
+
+.btn:active:before {
+  opacity: 0.8;
+}
+
+.d-pad-container {
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+.d-pad-button {
+  backdrop-filter: blur(5px);
+}
+
+#restartButton {
+  backdrop-filter: blur(5px);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .custom-cursor, .cursor-dot {
+    display: none;
+  }
+}

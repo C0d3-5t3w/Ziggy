@@ -898,20 +898,6 @@ class Znek {
             
             const offsetX = (CONSTANTS.SNAKE_HEAD_SIZE - CONSTANTS.GRID_SIZE) / 2;
             
-            const headCenterX = head.x + CONSTANTS.SNAKE_HEAD_SIZE / 2 - offsetX;
-            const headCenterY = head.y + CONSTANTS.SNAKE_HEAD_SIZE / 2 - offsetX;
-            
-            this.ctx.translate(headCenterX, headCenterY);
-            let rotation = 0;
-            switch(this.direction) {
-                case 'up': rotation = -Math.PI/2; break;
-                case 'down': rotation = Math.PI/2; break;
-                case 'left': rotation = Math.PI; break;
-                case 'right': rotation = 0; break;
-            }
-            this.ctx.rotate(rotation);
-            this.ctx.translate(-headCenterX, -headCenterY);
-            
             this.ctx.drawImage(
                 this.snakeImg, 
                 head.x - offsetX, 
