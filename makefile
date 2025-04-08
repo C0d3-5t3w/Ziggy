@@ -3,7 +3,7 @@ MAIN_PATH=cmd/main/main.go
 all: clean go php ts sass run 
 
 clean:
-	@go clean
+	# @go clean
 	@rm -rf vendor
 	@rm -rf pkg/assets/css
 	@rm -rf pkg/assets/js

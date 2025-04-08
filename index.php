@@ -77,7 +77,7 @@ header("timezone: PMT");
     
     <section class="section" style="background-color: #f0f0f0;">
         <div class="container" style="text-align: center;">
-            <h2 class="section-title">Get a Surprise from Ziggy!</h2>
+            <h2 class="section-title">Click the gift!</h2>
             <p>👇🏼</p>
             <button id="myButton" class="btn">🎁</button>
             <div id="result"></div>
