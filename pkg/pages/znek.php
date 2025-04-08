@@ -8,7 +8,7 @@ header("timezone: PMT");
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, height=device-height, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Play:wght@400;700&display=swap" rel="stylesheet">
     <title>Znek Game</title>
@@ -76,11 +76,23 @@ header("timezone: PMT");
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle at center, #0f1c2c, #050a14);
-            overflow: hidden;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 1200px;
         }
         
         .canvas {
             position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%; /* 4:3 aspect ratio */
             max-width: 95vw;
             max-height: 90vh;
             border-radius: 10px;
@@ -89,19 +101,22 @@ header("timezone: PMT");
         }
 
         #znekCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: block;
             border-radius: 10px;
             border: 2px solid rgba(0, 200, 255, 0.3);
             box-sizing: border-box;
-            max-width: 100%;
-            max-height: 100%;
         }
         
         .game-controls {
             position: absolute;
-            top: 20px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             background: rgba(0, 20, 40, 0.9);
             border: 2px solid rgba(0, 200, 255, 0.5);
             border-radius: 12px;
@@ -321,14 +336,95 @@ header("timezone: PMT");
                 right: -70px;
             }
         }
+        
+        /* Professional loading animation */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #050a14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(0, 255, 255, 0.1);
+            border-top-color: #00ccff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Return to home button */
+        .home-button {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .home-button:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .home-button:active {
+            transform: translateY(1px);
+        }
+        
+        .home-icon {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <div class="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <a href="../.." class="home-button">
+        <span class="home-icon">⌂</span>
+        <span>Home</span>
+    </a>
+    
     <button id="restartButton">Restart Game</button>
     <div class="game-container">
         <div class="game-overlay"></div>
-        <div class="canvas">
-            <canvas id="znekCanvas"></canvas>
+        <div class="canvas-wrapper">
+            <div class="canvas">
+                <canvas id="znekCanvas"></canvas>
+            </div>
         </div>
         <div id="controls" class="game-controls">
             <h3>How to Play Znek</h3>
@@ -362,6 +458,12 @@ header("timezone: PMT");
             const controls = document.getElementById('controls');
             const restartButton = document.getElementById('restartButton');
             const dPadButtons = document.querySelectorAll('.d-pad-button[data-direction], .shoot-button[data-direction]');
+            const loading = document.querySelector('.loading');
+
+            // Hide loading after short delay
+            setTimeout(() => {
+                loading.classList.add('hidden');
+            }, 800);
 
             function hideControls() {
                 if (controls.style.display !== 'none') {
@@ -412,45 +514,34 @@ header("timezone: PMT");
             
             try {
                 const canvas = document.getElementById('znekCanvas');
-                resizeCanvas();
                 
-                gameInstance = new Znek();
-                
-                window.addEventListener('resize', resizeCanvas);
-                
-                function resizeCanvas() {
-                    const container = document.querySelector('.canvas');
-                    const containerWidth = container.clientWidth;
-                    const containerHeight = container.clientHeight;
+                // Initial setup and resize handler
+                function handleResize() {
+                    const canvasContainer = document.querySelector('.canvas');
+                    const containerWidth = canvasContainer.clientWidth;
+                    const containerHeight = canvasContainer.clientHeight;
                     
-                    let width, height;
-                    const aspectRatio = 4/3;
-                    
-                    if (containerWidth / containerHeight > aspectRatio) {
-                        height = containerHeight;
-                        width = height * aspectRatio;
-                    } else {
-                        width = containerWidth;
-                        height = width / aspectRatio;
-                    }
-                    
-                    canvas.width = Math.floor(width);
-                    canvas.height = Math.floor(height);
+                    canvas.width = containerWidth;
+                    canvas.height = containerHeight;
                     
                     if (gameInstance && gameInstance.handleResize) {
                         gameInstance.handleResize();
                     }
                 }
+                
+                // Set initial canvas size based on container
+                handleResize();
+                
+                // Create game instance
+                gameInstance = new Znek();
+                
+                // Add resize listener
+                window.addEventListener('resize', handleResize);
+                
             } catch (error) {
                 console.error('Error initializing game:', error);
             }
         });
     </script>
-    <footer>
-        <div class="container">
-            <ul class="footer-links">
-            </ul>
-        </div>
-    </footer>
 </body>
 </html>

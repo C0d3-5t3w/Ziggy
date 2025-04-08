@@ -1,26 +1,37 @@
 :root {
-  --primary-color: #aa3333; 
-  --secondary-color: #4CAF50;
-  --background-color: #121212;
-  --text-color: #ffffff; 
-  --accent-color: #b967ff;
-  --accent-teal: #00ccff;
-  --orange-color: #ff9800;
-  --card-bg-color: #1e1e1e;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --primary-color: #ff0066; /* Neon pink - more vibrant retro color */
+  --secondary-color: #33ff99; /* Bright mint green - classic 80s color */
+  --background-color: #0c0c14; /* Deeper blue-black for CRT feel */
+  --text-color: #ffffff;
+  --accent-color: #9933ff; /* Brighter purple for retro feel */
+  --accent-teal: #00ddff; /* Brighter cyan */
+  --orange-color: #ff9900; /* More saturated orange */
+  --card-bg-color: #1a1a2e; /* Slight blue tint */
+  --shadow: 0 0 8px rgba(0, 255, 255, 0.3); /* Neon glow effect */
   --transition-standard: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --border-radius: 10px;
-  --gradient-primary: linear-gradient(135deg, var(--primary-color), #ff6b6b);
-  --gradient-accent: linear-gradient(135deg, var(--accent-color), #8a4bff);
+  --border-radius: 4px; /* Sharper corners for retro feel */
+  --gradient-primary: linear-gradient(135deg, var(--primary-color), #ff3366);
+  --gradient-accent: linear-gradient(135deg, var(--accent-color), #6633ff);
   --gradient-teal: linear-gradient(135deg, var(--accent-teal), #00a3cc);
+  --scanline-color: rgba(255, 255, 255, 0.04);
+  --retro-border: 2px solid rgba(100, 255, 255, 0.2);
+  --pixel-shadow: 0 0 5px rgba(0, 255, 255, 0.4), 0 0 10px rgba(0, 255, 255, 0.2);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  image-rendering: pixelated; /* For pixel-perfect scaling of images */
 }
 
+@font-face {
+  font-family: 'RetroFont';
+  src: url('../fonts/PressStart2P-Regular.ttf');
+  font-display: swap;
+}
+
+/* Retro Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -32,9 +43,9 @@
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.05); filter: brightness(1.2); }
+  100% { transform: scale(1); filter: brightness(1); }
 }
 
 @keyframes float {
@@ -43,12 +54,59 @@
   100% { transform: translateY(0px); }
 }
 
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.7; }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0) skew(0deg); }
+  20% { transform: translate(-2px, 2px) skew(1deg); }
+  40% { transform: translate(-2px, -2px) skew(-1deg); }
+  60% { transform: translate(2px, 2px) skew(-0.5deg); }
+  80% { transform: translate(2px, -2px) skew(0.5deg); }
+  100% { transform: translate(0) skew(0deg); }
+}
+
+/* CRT Effect */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--scanline-color) 0px,
+    var(--scanline-color) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.15; /* Subtle effect */
+  animation: scanline 10s linear infinite;
+  will-change: transform;
+}
+
 body {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Silkscreen', 'VT323', 'Courier New', monospace; /* Retro fonts */
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.6;
   overflow-x: hidden;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+  background-image: 
+    radial-gradient(rgba(0, 30, 60, 0.5) 1px, transparent 1px),
+    radial-gradient(rgba(0, 30, 60, 0.5) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
 }
 
 .container {
@@ -59,14 +117,15 @@ body {
 }
 
 header {
-  background-color: rgba(26, 26, 26, 0.98);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background-color: rgba(10, 10, 20, 0.98);
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
   backdrop-filter: blur(10px);
   transition: var(--transition-standard);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: var(--retro-border);
+  border-top: var(--retro-border);
 }
 
 .nav-container {
@@ -77,22 +136,25 @@ header {
 }
 
 .logo {
-  font-size: 2rem;
+  font-family: 'RetroFont', 'Press Start 2P', cursive;
+  font-size: 1.8rem;
   font-weight: 800;
   color: var(--primary-color);
   text-decoration: none;
   letter-spacing: -0.5px;
   position: relative;
   transition: var(--transition-standard);
-  text-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+  text-shadow: 0 0 10px rgba(255, 0, 102, 0.5), 0 0 20px rgba(255, 0, 102, 0.3);
+  animation: blink 2s infinite alternate;
 }
 
 .logo:hover {
   transform: scale(1.05);
+  animation: glitch 0.5s infinite;
 }
 
 .logo span {
-  color: var(--accent-color);
+  color: var(--accent-teal);
   position: relative;
   display: inline-block;
   animation: pulse 2s infinite;
@@ -112,11 +174,14 @@ header {
   color: #e0e0e0;
   text-decoration: none;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   padding: 0.5rem 0;
   display: inline-block;
   position: relative;
   transition: var(--transition-standard);
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  font-family: 'RetroFont', 'Press Start 2P', monospace;
 }
 
 .nav-link:after {
@@ -133,11 +198,13 @@ header {
 .nav-link:hover:after, 
 .nav-link.active:after {
   width: 100%;
+  box-shadow: var(--pixel-shadow);
 }
 
 .nav-link:hover, 
 .nav-link.active {
-  color: var(--orange-color);
+  color: var(--accent-teal);
+  text-shadow: 0 0 5px var(--accent-teal);
 }
 
 .hamburger {
@@ -154,6 +221,7 @@ header {
 .hamburger span {
   font-size: 1.7rem;
   color: var(--primary-color);
+  text-shadow: 0 0 5px var(--primary-color);
 }
 
 /* Hero Section */
@@ -171,28 +239,44 @@ header {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at top right, rgba(185, 103, 255, 0.1), transparent),
-               radial-gradient(circle at bottom left, rgba(255, 51, 51, 0.1), transparent);
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      rgba(10, 10, 30, 0.1),
+      rgba(10, 10, 30, 0.1) 2px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0) 4px
+    ),
+    radial-gradient(circle at top right, rgba(153, 51, 255, 0.1), transparent),
+    radial-gradient(circle at bottom left, rgba(255, 0, 102, 0.1), transparent);
   z-index: -1;
 }
 
 .hero h1 {
-  font-size: 3.5rem;
+  font-family: 'RetroFont', 'Press Start 2P', cursive;
+  font-size: 2.5rem;
   margin-bottom: 1rem;
   color: var(--primary-color);
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: 1px;
   animation: fadeIn 1s ease-out;
-  text-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+  text-shadow: 0 0 15px rgba(255, 0, 102, 0.5);
+  text-transform: uppercase;
+  line-height: 1.4;
+  padding-bottom: 15px;
+  border-bottom: 4px double rgba(255, 0, 102, 0.3);
+  display: inline-block;
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   max-width: 600px;
   margin: 0 auto 2rem;
   opacity: 0;
   animation: fadeIn 1s ease-out forwards;
   animation-delay: 0.3s;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .hero-img {
@@ -200,21 +284,23 @@ header {
   height: 200px;
   max-width: 100%;
   object-fit: cover;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px rgba(0, 221, 255, 0.5);
   margin: 0 auto;
   display: block;
   opacity: 0;
   animation: fadeIn 1s ease-out forwards, float 6s ease-in-out infinite;
   animation-delay: 0.6s;
   border-radius: 50%;
-  border: 4px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(0, 221, 255, 0.5);
   transition: var(--transition-standard);
+  image-rendering: auto; /* Override pixelated for photos */
+  filter: contrast(1.1) saturate(1.1);
 }
 
 .hero-img:hover {
   transform: scale(1.05) translateY(-10px);
-  box-shadow: 0 15px 30px rgba(255, 51, 51, 0.3);
-  border-color: rgba(255, 51, 51, 0.3);
+  box-shadow: 0 0 25px rgba(255, 0, 102, 0.5);
+  border-color: rgba(255, 0, 102, 0.5);
 }
 
 .section {
@@ -223,13 +309,16 @@ header {
 }
 
 .section-title {
+  font-family: 'RetroFont', 'Press Start 2P', cursive;
   text-align: center;
   margin-bottom: 3rem;
   color: var(--accent-color);
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   position: relative;
   padding-bottom: 1rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .section-title:after {
@@ -238,10 +327,11 @@ header {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
+  width: 80px;
   height: 3px;
   background: var(--gradient-accent);
-  border-radius: 3px;
+  border-radius: 0;
+  box-shadow: var(--pixel-shadow);
 }
 
 .card-container {
@@ -259,6 +349,22 @@ header {
   transform: translateY(20px);
   opacity: 0;
   animation: fadeIn 0.8s forwards;
+  border: var(--retro-border);
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-teal), var(--accent-color), var(--primary-color));
+  z-index: -1;
+  border-radius: calc(var(--border-radius) + 2px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .card:nth-child(2) {
@@ -271,7 +377,11 @@ header {
 
 .card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(185, 103, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 221, 255, 0.4);
+}
+
+.card:hover::before {
+  opacity: 1;
 }
 
 .card img {
@@ -279,11 +389,13 @@ header {
   height: 200px;
   object-fit: cover;
   transition: var(--transition-standard);
+  image-rendering: auto; /* Override pixelated for photos */
+  border-bottom: var(--retro-border);
 }
 
 .card:hover img {
   transform: scale(1.05);
-  filter: brightness(1.1);
+  filter: brightness(1.1) contrast(1.05);
 }
 
 .card-content {
@@ -292,11 +404,15 @@ header {
 }
 
 .card-title {
+  font-family: 'RetroFont', 'Press Start 2P', cursive;
   margin-bottom: 0.8rem;
   color: var(--secondary-color);
   position: relative;
   display: inline-block;
   font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .card-title:after {
@@ -308,6 +424,7 @@ header {
   height: 2px;
   background: var(--secondary-color);
   transition: width 0.3s ease;
+  box-shadow: var(--pixel-shadow);
 }
 
 .card:hover .card-title:after {
@@ -315,20 +432,24 @@ header {
 }
 
 .btn {
+  font-family: 'RetroFont', 'Press Start 2P', cursive;
   display: inline-block;
   padding: 0.8rem 1.8rem;
   background: var(--gradient-primary);
   color: white;
   border: none;
-  border-radius: 30px;
+  border-radius: var(--border-radius);
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   transition: var(--transition-standard);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 5px 15px rgba(255, 51, 51, 0.3);
+  box-shadow: 0 0 15px rgba(255, 0, 102, 0.3);
   z-index: 1;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
 }
 
 .btn:before {
@@ -345,7 +466,8 @@ header {
 
 .btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(255, 51, 51, 0.4);
+  box-shadow: 0 0 20px rgba(255, 0, 102, 0.5);
+  animation: glitch 0.3s infinite;
 }
 
 .btn:hover:before {
@@ -354,14 +476,15 @@ header {
 
 .btn:active {
   transform: translateY(1px);
-  box-shadow: 0 3px 10px rgba(255, 51, 51, 0.3);
+  box-shadow: 0 0 10px rgba(255, 0, 102, 0.3);
 }
 
 #myButton {
-  font-size: 2.2rem;
+  font-size: 2rem;
   padding: 1rem 1.2rem;
   border-radius: 50%;
   animation: pulse 2s infinite;
+  background: linear-gradient(135deg, #ff3366, #ff0066);
 }
 
 #result {
@@ -369,25 +492,28 @@ header {
   margin-top: 1.5rem;
   text-align: center;
   transition: var(--transition-standard);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 footer {
-  background-color: rgba(26, 26, 26, 0.95);
+  background-color: rgba(10, 10, 20, 0.95);
   color: white;
   padding: 3rem 0 2rem;
   text-align: center;
   position: relative;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: var(--retro-border);
+  border-bottom: var(--retro-border);
 }
 
 footer:before {
   content: '';
   position: absolute;
-  top: 0;
+  top: 4px;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   background: linear-gradient(to right, var(--primary-color), var(--accent-color), var(--accent-teal), var(--secondary-color));
+  box-shadow: var(--pixel-shadow);
 }
 
 .footer-links {
@@ -403,11 +529,15 @@ footer:before {
 }
 
 .footer-links a {
+  font-family: 'RetroFont', 'Press Start 2P', monospace;
   color: white;
   text-decoration: none;
   padding: 0.5rem 0;
   position: relative;
   transition: var(--transition-standard);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .footer-links a:after {
@@ -419,10 +549,12 @@ footer:before {
   left: 0;
   background: var(--gradient-primary);
   transition: width 0.3s ease;
+  box-shadow: var(--pixel-shadow);
 }
 
 .footer-links a:hover {
-  color: var(--primary-color);
+  color: var(--accent-teal);
+  text-shadow: 0 0 5px var(--accent-teal);
 }
 
 .footer-links a:hover:after {
