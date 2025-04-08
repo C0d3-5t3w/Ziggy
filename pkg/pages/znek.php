@@ -447,6 +447,7 @@ header("timezone: PMT");
             <div class="shoot-button" data-direction="shoot">🔴</div>
         </div>
     </div>
+    <script src="../assets/js/Znek.js"></script>
     <script>
         document.addEventListener('touchmove', function(e) {
             e.preventDefault();
@@ -515,6 +516,11 @@ header("timezone: PMT");
             try {
                 const canvas = document.getElementById('znekCanvas');
                 
+                // Check if Znek class is available
+                if (typeof Znek === 'undefined') {
+                    throw new Error('Znek game script not loaded properly');
+                }
+                
                 // Initial setup and resize handler
                 function handleResize() {
                     const canvasContainer = document.querySelector('.canvas');
@@ -534,12 +540,35 @@ header("timezone: PMT");
                 
                 // Create game instance
                 gameInstance = new Znek();
+                console.log('Znek game instance created successfully');
                 
                 // Add resize listener
                 window.addEventListener('resize', handleResize);
                 
             } catch (error) {
                 console.error('Error initializing game:', error);
+                // Display error message to user
+                const errorMessage = document.createElement('div');
+                errorMessage.style.position = 'absolute';
+                errorMessage.style.top = '50%';
+                errorMessage.style.left = '50%';
+                errorMessage.style.transform = 'translate(-50%, -50%)';
+                errorMessage.style.color = '#ff3333';
+                errorMessage.style.fontFamily = '"Orbitron", sans-serif';
+                errorMessage.style.fontSize = '16px';
+                errorMessage.style.textAlign = 'center';
+                errorMessage.style.background = 'rgba(0, 0, 0, 0.7)';
+                errorMessage.style.padding = '20px';
+                errorMessage.style.borderRadius = '10px';
+                errorMessage.style.zIndex = '2000';
+                errorMessage.innerHTML = `Game failed to load:<br>${error.message}<br>Try refreshing the page.`;
+                document.body.appendChild(errorMessage);
+                
+                // Hide loading indicator
+                const loading = document.querySelector('.loading');
+                if (loading) {
+                    loading.classList.add('hidden');
+                }
             }
         });
     </script>
