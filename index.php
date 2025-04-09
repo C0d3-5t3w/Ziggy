@@ -110,11 +110,11 @@ if ($hour >= 5 && $hour < 10) {
             </div>
             
             <ul class="nav-menu">
-                <li class="nav-item"><a href="index.php" class="nav-link">Home</a></li>
-                <li class="nav-item"><a href="pkg/pages/about.php" class="nav-link">About</a></li>
-                <li class="nav-item"><a href="pkg/pages/pictures.php" class="nav-link">Pictures</a></li>
-                <li class="nav-item"><a href="pkg/pages/FlappyZig.php" class="nav-link">Flappy Zig</a></li>
-                <li class="nav-item"><a href="pkg/pages/znek.php" class="nav-link">Znek</a></li>
+                <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="pkg/pages/about.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="pkg/pages/pictures.html" class="nav-link">Pictures</a></li>
+                <li class="nav-item"><a href="pkg/pages/FlappyZig.html" class="nav-link">Flappy Zig</a></li>
+                <li class="nav-item"><a href="pkg/pages/znek.html" class="nav-link">Znek</a></li>
             </ul>
         </div>
     </header>
@@ -186,11 +186,11 @@ if ($hour >= 5 && $hour < 10) {
     <footer>
         <div class="container">
             <ul class="footer-links">
-                <li><a href="index.php">Home</a></li>
-                <li><a href="pkg/pages/about.php">About</a></li>
-                <li><a href="pkg/pages/pictures.php">Pictures</a></li>
-                <li><a href="pkg/pages/FlappyZig.php">Flappy Zig</a></li>
-                <li><a href="pkg/pages/znek.php">Znek</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="pkg/pages/about.html">About</a></li>
+                <li><a href="pkg/pages/pictures.html">Pictures</a></li>
+                <li><a href="pkg/pages/FlappyZig.html">Flappy Zig</a></li>
+                <li><a href="pkg/pages/znek.html">Znek</a></li>
             </ul>
         </div>
     </footer>
