@@ -10,8 +10,8 @@ header("timezone: PMT");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="../assets/css/main.css">
-    <!-- <link rel="stylesheet" href="../assets/css/additions.css">
-    <link rel="stylesheet" href="../assets/css/znek-override.css"> -->
+    <link rel="stylesheet" href="../assets/css/additions.css">
+    <link rel="stylesheet" href="../assets/css/znek-override.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Play:wght@400;700&display=swap" rel="stylesheet">
     <title>Znek Game</title>
     <style>
