@@ -449,7 +449,7 @@ header("timezone: PMT");
             <div class="shoot-button" data-direction="shoot">🔴</div>
         </div>
     </div>
-    <script src="../assets/ts/Znek.js" type="module"></script>
+    <script src="../assets/js/Znek.js" type="module"></script>
     <script>
         document.addEventListener('touchmove', function(e) {
             e.preventDefault();
