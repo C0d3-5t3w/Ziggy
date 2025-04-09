@@ -1,0 +1,23 @@
+#znek-game-container * {
+    position: static;
+    transform: none;
+    animation: none;
+    transition: none;
+    filter: none;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: auto;
+}
+
+#znek-game-container canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+#znek-game-container div, 
+#znek-game-container span, 
+#znek-game-container canvas {
+    animation: none !important;
+    transition: none !important;
+}
