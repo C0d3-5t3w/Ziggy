@@ -423,7 +423,7 @@ header("timezone: PMT");
         <div class="game-overlay"></div>
         <div class="canvas-wrapper">
             <div class="canvas">
-                <canvas id="znekCanvas"></canvas>
+                <canvas id="znekCanvas" width="800" height="600"></canvas>
             </div>
         </div>
         <div id="controls" class="game-controls">
@@ -460,107 +460,49 @@ header("timezone: PMT");
             const restartButton = document.getElementById('restartButton');
             const dPadButtons = document.querySelectorAll('.d-pad-button[data-direction], .shoot-button[data-direction]');
             const loading = document.querySelector('.loading');
-
+            
             setTimeout(() => {
                 loading.classList.add('hidden');
-            }, 800);
-
-            function hideControls() {
-                if (controls.style.display !== 'none') {
-                    controls.classList.add('fade-out');
-                    setTimeout(() => {
-                        controls.style.display = 'none';
-                    }, 500);
-                }
+            }, 1000);
+            
+            if (restartButton) {
+                restartButton.addEventListener('click', function() {
+                    if (window.Znek && typeof window.Znek.prototype.reset === 'function') {
+                        window.gameInstance.reset();
+                    }
+                });
             }
-
-            document.addEventListener('keydown', hideControls);
             
-            dPadButtons.forEach(button => {
-                const direction = button.getAttribute('data-direction');
-                
-                button.addEventListener('mousedown', function(e) {
-                    button.classList.add('active');
-                    if (gameInstance) {
-                        gameInstance.handleDPadInput(direction);
-                    }
-                    hideControls();
+            if (dPadButtons) {
+                dPadButtons.forEach(button => {
+                    ['touchstart', 'mousedown'].forEach(eventType => {
+                        button.addEventListener(eventType, function(e) {
+                            e.preventDefault();
+                            const direction = this.getAttribute('data-direction');
+                            if (window.gameInstance && typeof window.gameInstance.handleDPadInput === 'function') {
+                                window.gameInstance.handleDPadInput(direction);
+                            }
+                        });
+                    });
                 });
-                
-                button.addEventListener('mouseup', function(e) {
-                    button.classList.remove('active');
-                });
-                
-                button.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    button.classList.add('active');
-                    if (gameInstance) {
-                        gameInstance.handleDPadInput(direction);
-                    }
-                    hideControls();
-                });
-                
-                button.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    button.classList.remove('active');
-                });
-            });
+            }
             
-            restartButton.addEventListener('click', function() {
-                if (gameInstance) {
-                    gameInstance.reset();
-                }
-            });
+            if (controls) {
+                ['touchstart', 'keydown', 'mousedown'].forEach(eventType => {
+                    document.addEventListener(eventType, function startGame(e) {
+                        controls.classList.add('fade-out');
+                        // Remove this event listener once the game has started
+                        ['touchstart', 'keydown', 'mousedown'].forEach(ev => {
+                            document.removeEventListener(ev, startGame);
+                        });
+                    }, { once: true });
+                });
+            }
             
             try {
-                const canvas = document.getElementById('znekCanvas');
-                
-                if (typeof Znek === 'undefined') {
-                    throw new Error('Znek game script not loaded properly');
-                }
-                
-                function handleResize() {
-                    const canvasContainer = document.querySelector('.canvas');
-                    const containerWidth = canvasContainer.clientWidth;
-                    const containerHeight = canvasContainer.clientHeight;
-                    
-                    canvas.width = containerWidth;
-                    canvas.height = containerHeight;
-                    
-                    if (gameInstance && gameInstance.handleResize) {
-                        gameInstance.handleResize();
-                    }
-                }
-                
-                handleResize();
-                
-                gameInstance = new Znek();
-                console.log('Znek game instance created successfully');
-                
-                window.addEventListener('resize', handleResize);
-                
+                window.gameInstance = new Znek();
             } catch (error) {
-                console.error('Error initializing game:', error);
-                const errorMessage = document.createElement('div');
-                errorMessage.style.position = 'absolute';
-                errorMessage.style.top = '50%';
-                errorMessage.style.left = '50%';
-                errorMessage.style.transform = 'translate(-50%, -50%)';
-                errorMessage.style.color = '#ff3333';
-                errorMessage.style.fontFamily = '"Orbitron", sans-serif';
-                errorMessage.style.fontSize = '16px';
-                errorMessage.style.textAlign = 'center';
-                errorMessage.style.background = 'rgba(0, 0, 0, 0.7)';
-                errorMessage.style.padding = '20px';
-                errorMessage.style.borderRadius = '10px';
-                errorMessage.style.zIndex = '2000';
-                errorMessage.innerHTML = `Game failed to load:<br>${error.message}<br>Try refreshing the page.`;
-                document.body.appendChild(errorMessage);
-                
-                const loading = document.querySelector('.loading');
-                if (loading) {
-                    loading.classList.add('hidden');
-                }
+                console.error('Failed to initialize Znek game:', error);
             }
         });
     </script>
