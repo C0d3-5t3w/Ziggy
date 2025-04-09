@@ -10,8 +10,8 @@ header("timezone: PMT");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/additions.css">
-    <link rel="stylesheet" href="../assets/css/znek-override.css">
+    <!-- <link rel="stylesheet" href="../assets/css/additions.css">
+    <link rel="stylesheet" href="../assets/css/znek-override.css"> -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Play:wght@400;700&display=swap" rel="stylesheet">
     <title>Znek Game</title>
     <style>
@@ -94,7 +94,7 @@ header("timezone: PMT");
             position: relative;
             width: 100%;
             height: 0;
-            padding-bottom: 75%; /* 4:3 aspect ratio */
+            padding-bottom: 75%; 
             max-width: 95vw;
             max-height: 90vh;
             border-radius: 10px;
@@ -339,7 +339,6 @@ header("timezone: PMT");
             }
         }
         
-        /* Professional loading animation */
         .loading {
             position: fixed;
             top: 0;
@@ -373,7 +372,6 @@ header("timezone: PMT");
             to { transform: rotate(360deg); }
         }
 
-        /* Return to home button */
         .home-button {
             position: fixed;
             top: 15px;
