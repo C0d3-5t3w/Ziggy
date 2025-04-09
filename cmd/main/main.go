@@ -19,7 +19,7 @@ func main() {
 			http.ServeFile(w, r, "index.html")
 			return
 		}
-		if strings.HasPrefix(path, "/pkg/pages/") {
+		if strings.HasPrefix(path, "/pkg/pages/") || strings.HasPrefix(path, "/pkg/assets/js/") {
 			http.ServeFile(w, r, path[1:])
 			return
 		}

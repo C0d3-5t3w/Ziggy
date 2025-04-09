@@ -1535,6 +1535,7 @@ class Znek {
 
 if (typeof window !== 'undefined') {
     (window as any).Znek = Znek;
+    new Znek();
 }
 
 export default Znek;

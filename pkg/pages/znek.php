@@ -9,7 +9,7 @@ header("timezone: PMT");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/sass/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Play:wght@400;700&display=swap" rel="stylesheet">
     <title>Znek Game</title>
     <style>
@@ -447,7 +447,7 @@ header("timezone: PMT");
             <div class="shoot-button" data-direction="shoot">🔴</div>
         </div>
     </div>
-    <script src="../assets/js/Znek.js"></script>
+    <script src="../assets/ts/Znek.js" type="module"></script>
     <script>
         document.addEventListener('touchmove', function(e) {
             e.preventDefault();
@@ -461,7 +461,6 @@ header("timezone: PMT");
             const dPadButtons = document.querySelectorAll('.d-pad-button[data-direction], .shoot-button[data-direction]');
             const loading = document.querySelector('.loading');
 
-            // Hide loading after short delay
             setTimeout(() => {
                 loading.classList.add('hidden');
             }, 800);
@@ -516,12 +515,10 @@ header("timezone: PMT");
             try {
                 const canvas = document.getElementById('znekCanvas');
                 
-                // Check if Znek class is available
                 if (typeof Znek === 'undefined') {
                     throw new Error('Znek game script not loaded properly');
                 }
                 
-                // Initial setup and resize handler
                 function handleResize() {
                     const canvasContainer = document.querySelector('.canvas');
                     const containerWidth = canvasContainer.clientWidth;
@@ -535,19 +532,15 @@ header("timezone: PMT");
                     }
                 }
                 
-                // Set initial canvas size based on container
                 handleResize();
                 
-                // Create game instance
                 gameInstance = new Znek();
                 console.log('Znek game instance created successfully');
                 
-                // Add resize listener
                 window.addEventListener('resize', handleResize);
                 
             } catch (error) {
                 console.error('Error initializing game:', error);
-                // Display error message to user
                 const errorMessage = document.createElement('div');
                 errorMessage.style.position = 'absolute';
                 errorMessage.style.top = '50%';
@@ -564,7 +557,6 @@ header("timezone: PMT");
                 errorMessage.innerHTML = `Game failed to load:<br>${error.message}<br>Try refreshing the page.`;
                 document.body.appendChild(errorMessage);
                 
-                // Hide loading indicator
                 const loading = document.querySelector('.loading');
                 if (loading) {
                     loading.classList.add('hidden');
