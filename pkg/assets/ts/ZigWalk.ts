@@ -49,6 +49,7 @@ declare namespace THREE {
     lerp(v: Vector3, alpha: number): this;
     normalize(): this;
     distanceTo(v: Vector3): number;
+    subVectors(a: Vector3, b: Vector3): this;
   }
   
   class Euler {
@@ -256,7 +257,7 @@ namespace GameConfig {
   });
 
   export const VISUALS = Object.freeze({
-    SKY_COLOR: 0x000000,
+    SKY_COLOR: 0x2E86C1,
     GROUND_COLOR: 0x3A4C40,
     PLAYER_COLOR: 0xA9A9A9,
     TREE_TRUNK_COLOR: 0x654321,
@@ -819,6 +820,8 @@ class ZigWalk {
     this.initSquirrels();
     this.initFpsCounter();
     
+    this.randomizePlayerPosition();
+    
     setTimeout(() => {
       if (this.loadingScreen) {
         this.loadingScreen.style.opacity = '0';
@@ -1344,7 +1347,6 @@ class ZigWalk {
     
     catGroup.rotation.y = Math.PI; 
     catGroup.position.y = GameConfig.PLAYER.START_Y - 0.4; 
-    catGroup.position.z = GameConfig.PLAYER.START_Z;
     
     this.player = catGroup as unknown as THREE.Mesh;
     this.scene.add(catGroup);
@@ -1638,6 +1640,11 @@ class ZigWalk {
     let isMoving = false;
     this.isBackingUp = false;
     
+    const cameraForward = new THREE.Vector3();
+    cameraForward.subVectors(this.cameraTargetLookAt, this.camera.position);
+    cameraForward.y = 0;
+    cameraForward.normalize();
+    
     if (this.keys['ArrowLeft'] || this.keys['a'] || this.mobileControls.left) {
       this.playerTargetRotation += Math.PI / 32; 
       isMoving = true;
@@ -1651,10 +1658,11 @@ class ZigWalk {
     if ((this.keys['ArrowUp'] || this.keys['w'] || this.mobileControls.forward)) {
       const forwardLimit = -GameConfig.WORLD.GROUND_LENGTH + 20;
       if (this.player.position.z > forwardLimit) {
-        const moveX = Math.sin(this.player.rotation.y) * movementSpeed * 1.2;
-        const moveZ = Math.cos(this.player.rotation.y) * movementSpeed * 1.2;
-        this.player.position.x += moveX;
-        this.player.position.z -= moveZ;
+        this.player.position.x += cameraForward.x * movementSpeed * 1.2;
+        this.player.position.z += cameraForward.z * movementSpeed * 1.2;
+        
+        this.playerTargetRotation = Math.atan2(cameraForward.x, cameraForward.z);
+        
         isMoving = true;
       }
     }
@@ -1662,15 +1670,16 @@ class ZigWalk {
     if ((this.keys['ArrowDown'] || this.keys['s'] || this.mobileControls.backward)) {
       this.isBackingUp = true;
       const backwardLimit = 5;
-      const moveX = Math.sin(this.player.rotation.y) * movementSpeed * 0.8; 
-      const moveZ = Math.cos(this.player.rotation.y) * movementSpeed * 0.8;
       
-      const newX = this.player.position.x - moveX;
-      const newZ = this.player.position.z + moveZ;
+      const newX = this.player.position.x - cameraForward.x * movementSpeed * 0.8;
+      const newZ = this.player.position.z - cameraForward.z * movementSpeed * 0.8;
       
       if (newZ < backwardLimit) {
         this.player.position.x = newX;
         this.player.position.z = newZ;
+        
+        this.playerTargetRotation = Math.atan2(-cameraForward.x, -cameraForward.z);
+        
         isMoving = true;
       }
     }
@@ -2286,6 +2295,16 @@ class ZigWalk {
       this.frameCounter = 0;
       this.lastFpsUpdate = timestamp;
     }
+  }
+
+  private randomizePlayerPosition(): void {
+    const x = Math.random() * (GameConfig.WORLD.GROUND_WIDTH - 10) - ((GameConfig.WORLD.GROUND_WIDTH - 10) / 2);
+    const z = -Math.random() * (GameConfig.WORLD.GROUND_LENGTH - 20);
+    this.player.position.set(x, GameConfig.PLAYER.START_Y, z);
+    
+    this.cameraTargetPosition = new THREE.Vector3();
+    this.cameraTargetLookAt = new THREE.Vector3();
+    this.updateCamera();
   }
 }
 
