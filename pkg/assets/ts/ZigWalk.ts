@@ -232,8 +232,8 @@ namespace GameConfig {
   export const WORLD = Object.freeze({
     BOUNDARY_LEFT: -50,
     BOUNDARY_RIGHT: 50,
-    GROUND_WIDTH: 3000,
-    GROUND_LENGTH: 3000,
+    GROUND_WIDTH: 30000,
+    GROUND_LENGTH: 30000,
     MOUNTAIN_COUNT: 40,
     CLOUD_COUNT: 80,
     FLOWER_COUNT: 800,
