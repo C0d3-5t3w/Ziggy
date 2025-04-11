@@ -60,6 +60,7 @@ declare namespace THREE {
     rotation: Euler;
     scale: Vector3;
     children: Object3D[];
+    parent: Object3D | null;
     castShadow: boolean;
     receiveShadow: boolean;
     lookAt(vector: Vector3): void;
@@ -224,15 +225,18 @@ namespace GameConfig {
   export const WORLD = Object.freeze({
     BOUNDARY_LEFT: -50,
     BOUNDARY_RIGHT: 50,
-    GROUND_WIDTH: 150,
-    GROUND_LENGTH: 3000,
+    GROUND_WIDTH: 15000,
+    GROUND_LENGTH: 15000,
     MOUNTAIN_COUNT: 40,
     CLOUD_COUNT: 80,
     FLOWER_COUNT: 800,
     BUSH_COUNT: 150,
     TREE_COUNT: 250,
     ROCK_COUNT: 120,
-    BIRD_COUNT: 60
+    BIRD_COUNT: 60,
+    FENCE_HEIGHT: 2.5,
+    FENCE_POST_DISTANCE: 4,
+    FENCE_SECTION_WIDTH: 0.2
   });
 
   export const OBSTACLES = Object.freeze({
@@ -255,7 +259,9 @@ namespace GameConfig {
     MOUNTAIN_COLORS: [0x8eaabd, 0x6e8a9d, 0x5d798c],
     CLOUD_COLOR: 0xffffff,
     FLOWER_COLORS: [0xff5252, 0xff9800, 0xffeb3b, 0xffffff, 0xe040fb],
-    BUSH_COLOR: 0x2e7d32
+    BUSH_COLOR: 0x2e7d32,
+    FENCE_POST_COLOR: 0x8B4513,
+    FENCE_SECTION_COLOR: 0xA0522D
   });
 
   export const UI = Object.freeze({
@@ -466,7 +472,7 @@ class Bird {
   }
 }
 
-class CubeRunner {
+class ZigWalk {
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
@@ -1462,11 +1468,38 @@ class CubeRunner {
   }
   
   private checkCollision(player: THREE.Object3D, obstacle: THREE.Object3D): boolean {
+    if (this.isEnvironmentItem(obstacle)) {
+      return false;
+    }
+    
     const playerBox = new THREE.Box3().setFromObject(player);
     const obstacleBox = new THREE.Box3().setFromObject(obstacle);
     return playerBox.intersectsBox(obstacleBox);
   }
   
+  private isEnvironmentItem(object: THREE.Object3D): boolean {
+    const environmentItems = [
+      ...this.ground.children,
+      ...this.mountains,
+      ...this.clouds
+    ];
+    
+    return environmentItems.some(item => {
+      return object === item || this.isObjectDescendantOf(object, item);
+    });
+  }
+  
+  private isObjectDescendantOf(object: THREE.Object3D, possibleParent: THREE.Object3D): boolean {
+    let currentObj = object.parent;
+    while (currentObj !== null) {
+      if (currentObj === possibleParent) {
+        return true;
+      }
+      currentObj = currentObj.parent;
+    }
+    return false;
+  }
+
   private showMessage(message: string): void {
     const messageContainer = document.createElement('div');
     messageContainer.innerText = message;
@@ -1625,6 +1658,7 @@ class CubeRunner {
   private initEnvironment(): void {
     this.addStandaloneTrees();
     this.addStandaloneRocks();
+    this.addBoundaryFence();
   }
 
   private addStandaloneTrees(): void {
@@ -1654,6 +1688,199 @@ class CubeRunner {
       
       rock.position.set(x, 0, z);
       this.scene.add(rock);
+    }
+  }
+
+  private addBoundaryFence(): void {
+    const fenceGroup = new THREE.Group();
+    
+    const groundHalfWidth = GameConfig.WORLD.GROUND_WIDTH / 2;
+    const groundHalfLength = GameConfig.WORLD.GROUND_LENGTH / 2;
+    const fenceHeight = GameConfig.WORLD.FENCE_HEIGHT;
+    const postDistance = GameConfig.WORLD.FENCE_POST_DISTANCE;
+    const sectionWidth = GameConfig.WORLD.FENCE_SECTION_WIDTH;
+    const postWidth = sectionWidth * 1.5;
+    
+    const postMaterial = new THREE.MeshStandardMaterial({
+      color: GameConfig.VISUALS.FENCE_POST_COLOR,
+      roughness: 0.8
+    });
+    
+    const sectionMaterial = new THREE.MeshStandardMaterial({
+      color: GameConfig.VISUALS.FENCE_SECTION_COLOR,
+      roughness: 0.7
+    });
+    
+    const createPost = (x: number, z: number): THREE.Mesh => {
+      const height = fenceHeight * (0.9 + Math.random() * 0.2); 
+      const postGeometry = new THREE.BoxGeometry(postWidth, height, postWidth);
+      const post = new THREE.Mesh(postGeometry, postMaterial);
+      post.position.set(x, height / 2, z);
+      post.castShadow = true;
+      post.receiveShadow = true;
+      return post;
+    };
+    
+    const createSection = (startX: number, startZ: number, endX: number, endZ: number): THREE.Mesh => {
+      const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endZ - startZ, 2));
+      const sectionGeometry = new THREE.BoxGeometry(length, fenceHeight * 0.15, sectionWidth);
+      const section = new THREE.Mesh(sectionGeometry, sectionMaterial);
+      
+      const midX = (startX + endX) / 2;
+      const midZ = (startZ + endZ) / 2;
+      const angle = Math.atan2(endZ - startZ, endX - startX);
+      
+      section.position.set(midX, fenceHeight * 0.6, midZ);
+      section.rotation.y = angle;
+      section.castShadow = true;
+      section.receiveShadow = true;
+      
+      const lowerSection = new THREE.Mesh(sectionGeometry.clone(), sectionMaterial);
+      lowerSection.position.set(midX, fenceHeight * 0.25, midZ);
+      lowerSection.rotation.y = angle;
+      lowerSection.castShadow = true;
+      lowerSection.receiveShadow = true;
+      
+      fenceGroup.add(lowerSection);
+      return section;
+    };
+    
+    
+    const backEdgeZ = -groundHalfLength;
+    const postsCountX = Math.ceil(GameConfig.WORLD.GROUND_WIDTH / postDistance);
+    
+    for (let i = 0; i <= postsCountX; i++) {
+      const x = -groundHalfWidth + (i * postDistance);
+      const z = backEdgeZ;
+      
+      const post = createPost(x, z);
+      fenceGroup.add(post);
+      
+      if (i < postsCountX) {
+        const nextX = -groundHalfWidth + ((i + 1) * postDistance);
+        const section = createSection(x, z, nextX, z);
+        fenceGroup.add(section);
+      }
+    }
+    
+    const rightEdgeX = groundHalfWidth;
+    const postsCountZ = Math.ceil(GameConfig.WORLD.GROUND_LENGTH / postDistance);
+    
+    for (let i = 0; i <= postsCountZ; i++) {
+      const x = rightEdgeX;
+      const z = -groundHalfLength + (i * postDistance);
+      
+      if (i > 0) { 
+        const post = createPost(x, z);
+        fenceGroup.add(post);
+      }
+      
+      if (i < postsCountZ) {
+        const nextZ = -groundHalfLength + ((i + 1) * postDistance);
+        const section = createSection(x, z, x, nextZ);
+        fenceGroup.add(section);
+      }
+    }
+    
+    const leftEdgeX = -groundHalfWidth;
+    
+    for (let i = 0; i <= postsCountZ; i++) {
+      const x = leftEdgeX;
+      const z = -groundHalfLength + (i * postDistance);
+      
+      if (i > 0) { 
+        const post = createPost(x, z);
+        fenceGroup.add(post);
+      }
+      
+      if (i < postsCountZ) {
+        const nextZ = -groundHalfLength + ((i + 1) * postDistance);
+        const section = createSection(x, z, x, nextZ);
+        fenceGroup.add(section);
+      }
+    }
+    
+    const frontEdgeZ = 0;
+    
+    for (let i = 0; i <= postsCountX; i++) {
+      const x = -groundHalfWidth + (i * postDistance);
+      const z = frontEdgeZ;
+      
+      if (!(i === 0 || i === postsCountX)) { 
+        const post = createPost(x, z);
+        fenceGroup.add(post);
+      }
+      
+      if (i < postsCountX) {
+        const nextX = -groundHalfWidth + ((i + 1) * postDistance);
+        const section = createSection(x, z, nextX, z);
+        fenceGroup.add(section);
+      }
+    }
+    
+    this.addFenceDecorations(fenceGroup, groundHalfWidth, groundHalfLength);
+    
+    this.scene.add(fenceGroup);
+  }
+  
+  private addFenceDecorations(fenceGroup: THREE.Group, groundHalfWidth: number, groundHalfLength: number): void {
+    const vineMaterial = new THREE.MeshStandardMaterial({
+      color: 0x4CAF50,
+      roughness: 0.8
+    });
+    
+    for (let i = 0; i < 40; i++) {
+      const side = Math.floor(Math.random() * 4);
+      
+      let x: number, z: number;
+      switch (side) {
+        case 0: 
+          x = (Math.random() * GameConfig.WORLD.GROUND_WIDTH) - groundHalfWidth;
+          z = -groundHalfLength;
+          break;
+        case 1: 
+          x = groundHalfWidth;
+          z = (Math.random() * GameConfig.WORLD.GROUND_LENGTH) - groundHalfLength;
+          break;
+        case 2: 
+          x = (Math.random() * GameConfig.WORLD.GROUND_WIDTH) - groundHalfWidth;
+          z = 0;
+          break;
+        default: 
+          x = -groundHalfWidth;
+          z = (Math.random() * GameConfig.WORLD.GROUND_LENGTH) - groundHalfLength;
+          break;
+      }
+      
+      const vineHeight = Math.random() * GameConfig.WORLD.FENCE_HEIGHT * 0.8;
+      const vineWidth = 0.05 + Math.random() * 0.1;
+      const vineGeometry = new THREE.CylinderGeometry(vineWidth, vineWidth, vineHeight, 4);
+      const vine = new THREE.Mesh(vineGeometry, vineMaterial);
+      
+      vine.position.set(
+        x + (Math.random() - 0.5) * 0.5, 
+        GameConfig.WORLD.FENCE_HEIGHT - vineHeight / 2,
+        z + (Math.random() - 0.5) * 0.5
+      );
+      
+      vine.castShadow = true;
+      fenceGroup.add(vine);
+      
+      if (Math.random() > 0.5) {
+        const leafSize = 0.2 + Math.random() * 0.3;
+        const leafGeometry = new THREE.SphereGeometry(leafSize, 4, 4);
+        const leaf = new THREE.Mesh(leafGeometry, vineMaterial);
+        
+        leaf.position.set(
+          vine.position.x + (Math.random() - 0.5) * 0.2,
+          vine.position.y + vineHeight * (Math.random() - 0.5) * 0.5,
+          vine.position.z + (Math.random() - 0.5) * 0.2
+        );
+        
+        leaf.scale.y = 0.5;
+        leaf.castShadow = true;
+        fenceGroup.add(leaf);
+      }
     }
   }
 
@@ -1727,5 +1954,5 @@ class Particle {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  new CubeRunner();
+  new ZigWalk();
 });
