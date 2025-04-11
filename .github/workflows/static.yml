@@ -1,28 +1,20 @@
-# Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -30,18 +22,150 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          npm init -y
+          npm install -g sass
+          npm install --save-dev terser eslint typescript
+          
+      - name: Create eslint config
+        run: |
+          echo '{
+            "env": {
+              "browser": true,
+              "es2021": true
+            },
+            "extends": "eslint:recommended",
+            "parserOptions": {
+              "ecmaVersion": 2021,
+              "sourceType": "module"
+            }
+          }' > .eslintrc.json
+          
+      - name: Create tsconfig.json
+        run: |
+          echo '{
+            "compilerOptions": {
+              "target": "ES6",
+              "module": "None",
+              "outDir": "./pkg/assets/js",
+              "rootDir": "./pkg/assets/ts",
+              "strict": true,
+              "esModuleInterop": true,
+              "skipLibCheck": true,
+              "forceConsistentCasingInFileNames": true
+            },
+            "include": ["./pkg/assets/ts/**/*"]
+          }' > tsconfig.json
+      
+      - name: List TypeScript files
+        run: |
+          echo "Found TypeScript files:"
+          find ./pkg/assets/ts -name "*.ts" | sort
+      
+      - name: Compile TypeScript
+        run: |
+          if command -v tsc >/dev/null 2>&1; then
+            echo "Compiling TypeScript files..."
+            mkdir -p pkg/assets/js
+            tsc pkg/assets/ts/main.ts --outDir pkg/assets/js --target es5
+            tsc pkg/assets/ts/Znek.ts --outDir pkg/assets/js --target es5
+            tsc pkg/assets/ts/ZigWalk.ts --outDir pkg/assets/js --target es5
+            tsc pkg/assets/ts/FlappyZig.ts --outDir pkg/assets/js --target es5
+            tsc pkg/assets/ts/dropdown.ts --outDir pkg/assets/js --target es5
+            tsc pkg/assets/ts/animations.ts --outDir pkg/assets/js --target es5
+          else
+            echo "TypeScript compiler not found - skipping TS compilation"
+          fi
+          
+      - name: Verify JavaScript output
+        run: |
+          echo "Generated JavaScript files:"
+          find ./pkg/assets/js -name "*.js" | sort
+          # Check specifically for dropdown.js and altdropdown.js
+          if [ -f "./pkg/assets/js/dropdown.js" ]; then
+            echo "✅ dropdown.js successfully generated"
+          else
+            echo "❌ dropdown.js missing"
+            exit 1
+          fi
+          if [ -f "./pkg/assets/js/altdropdown.js" ]; then
+            echo "✅ altdropdown.js successfully generated"
+          else
+            echo "❌ altdropdown.js missing"
+            exit 1
+          fi
+          
+      - name: Lint JavaScript
+        run: |
+          npx eslint pkg/assets/js/*.js --fix || true
+          
+      - name: Minify JavaScript
+        run: |
+          for file in pkg/assets/js/*.js; do
+            if [ -f "$file" ]; then
+              echo "Minifying $file"
+              npx terser "$file" \
+                --compress \
+                --mangle \
+                --source-map "base='pkg/assets/js',root='pkg/assets/js',url='$(basename "$file").map'" \
+                --output "${file%.js}.min.js"
+              if [ -f "${file%.js}.min.js" ]; then
+                mv "${file%.js}.min.js" "$file"
+                echo "✅ Successfully minified $file"
+              else
+                echo "⚠️ Warning: Minification of $file may have failed, keeping original"
+              fi
+            fi
+          done
+          
+      - name: Process PHP files
+        run: |
+          echo "Processing PHP files..."
+          # Convert PHP files to HTML or copy them as needed
+          for file in index.php 404.php pkg/pages/*.php; do
+            if [ -f "$file" ]; then
+              html_file="${file%.php}.html"
+              php "$file" > "$html_file" 2>/dev/null || cp "$file" "$html_file"
+              echo "Processed $file to $html_file"
+            fi
+          done
+          
+      - name: Compile Sass
+        run: |
+          if command -v sass >/dev/null 2>&1; then
+            echo "Compiling Sass files..."
+            mkdir -p pkg/assets/css
+            sass pkg/assets/sass/main.scss:pkg/assets/css/main.css --style compressed
+            sass pkg/assets/sass/ZigWalk.scss:pkg/assets/css/ZigWalk.css --style compressed
+            sass pkg/assets/sass/znek-override.scss:pkg/assets/css/znek-override.css --style compressed
+            sass pkg/assets/sass/fonts.scss:pkg/assets/css/fonts.css --style compressed
+            sass pkg/assets/sass/additions.scss:pkg/assets/css/additions.css --style compressed
+            sass pkg/assets/sass/alt.scss:pkg/assets/css/alt.css --style compressed 2>/dev/null || true
+          else
+            echo "Note: pkg/assets/sass/alt.scss not found - skipping compilation"
+          fi
+          
       - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./_site
+        uses: actions/configure-pages@v5
+        
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: '.'
+          
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
