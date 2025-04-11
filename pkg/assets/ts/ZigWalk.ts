@@ -232,8 +232,8 @@ namespace GameConfig {
   export const WORLD = Object.freeze({
     BOUNDARY_LEFT: -50,
     BOUNDARY_RIGHT: 50,
-    GROUND_WIDTH: 30000,
-    GROUND_LENGTH: 30000,
+    GROUND_WIDTH: 300,
+    GROUND_LENGTH: 300,
     MOUNTAIN_COUNT: 40,
     CLOUD_COUNT: 80,
     FLOWER_COUNT: 800,
@@ -257,7 +257,7 @@ namespace GameConfig {
   });
 
   export const VISUALS = Object.freeze({
-    SKY_COLOR: 0x0000FF,
+    SKY_COLOR: 0x0055ff,
     GROUND_COLOR: 0x3A4C40,
     PLAYER_COLOR: 0xA9A9A9,
     TREE_TRUNK_COLOR: 0x654321,
@@ -845,8 +845,8 @@ class ZigWalk {
   private initScene(): void {
     this.scene = new THREE.Scene();
     
-    const topColor = new THREE.Color(0x0077ff);
-    const bottomColor = new THREE.Color(0xffffff);
+    const topColor = new THREE.Color(0x0055ff);  
+    const bottomColor = new THREE.Color(0xaaddff); 
     
     const vertexShader = `
       varying vec3 vWorldPosition;
@@ -876,7 +876,7 @@ class ZigWalk {
       exponent: { value: 0.6 }
     };
     
-    const skyboxRadius = Math.max(GameConfig.WORLD.GROUND_WIDTH, GameConfig.WORLD.GROUND_LENGTH) * 1.5;
+    const skyboxRadius = Math.max(GameConfig.WORLD.GROUND_WIDTH, GameConfig.WORLD.GROUND_LENGTH) * 1.2;
     const skyGeo = new THREE.SphereGeometry(skyboxRadius, 32, 15);
     const skyMat = new THREE.ShaderMaterial({
       vertexShader: vertexShader,
