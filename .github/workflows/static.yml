@@ -110,7 +110,7 @@ jobs:
           echo "JavaScript files count: $js_files"
           
           # Special handling for critical files
-          for critical_file in "Znek" "FlappyZig" "main" "alt" "dropdown" "altdropdown"; do
+          for critical_file in "Znek" "FlappyZig" "main" "ZigWalk" "dropdown" "animations"; do
             if [ -f "./pkg/assets/ts/${critical_file}.ts" ] && [ ! -f "./pkg/assets/js/${critical_file}.js" ]; then
               echo "⚠️ Critical file missing: ${critical_file}.js - attempting direct compilation"
               npx tsc ./pkg/assets/ts/${critical_file}.ts --outFile ./pkg/assets/js/${critical_file}.js --target ES6 --module None
@@ -119,7 +119,7 @@ jobs:
           
       - name: Lint JavaScript
         run: |
-          npx eslint assets/js/*.js --fix || true
+          npx eslint pkg/assets/js/*.js --fix || true
           
       - name: Minify JavaScript
         run: |
@@ -129,9 +129,8 @@ jobs:
               npx terser "$file" \
                 --compress \
                 --mangle \
-                --source-map "base='assets/js',root='assets/js',url='$(basename "$file").map'" \
                 --output "${file%.js}.min.js"
-              if [ -f "${file%.js}.min.js}" ]; then
+              if [ -f "${file%.js}.min.js" ]; then
                 mv "${file%.js}.min.js" "$file"
                 echo "✅ Successfully minified $file"
               else
@@ -145,15 +144,20 @@ jobs:
           echo "Listing all PHP files found in repository:"
           find . -type f -name "*.php" | sort
           
-          echo "\nProcessing PHP files..."
+          echo "Processing PHP files..."
           find . -type f -name "*.php" -exec sh -c '
-            echo "Converting $1 to ${1%.php}.html"
-            php "$1" > "${1%.php}.html"
-            rm "$1"
+            outfile="${1%.php}.html"
+            outdir=$(dirname "$outfile")
+            mkdir -p "$outdir"
+            echo "Converting $1 to $outfile"
+            php "$1" > "$outfile"
           ' sh {} \;
           
-          echo "\nVerifying conversion - HTML files created:"
+          echo "Verifying conversion - HTML files created:"
           find . -type f -name "*.html" | grep -v "node_modules" | sort
+          
+          # Don't remove PHP files yet - keep them for reference
+          # find . -type f -name "*.php" -delete
           
       - name: Compile Sass
         run: |
@@ -170,7 +174,7 @@ jobs:
             mkdir -p "$(dirname "$css_file")"
             
             echo "Compiling $scss_file to $css_file"
-            sass "$scss_file":"$css_file"
+            sass "$scss_file":"$css_file" --style=compressed
             
             if [ -f "$css_file" ]; then
               echo "✅ Successfully compiled $scss_file to $css_file"
@@ -182,6 +186,74 @@ jobs:
           # Verify CSS outputs
           echo "Generated CSS files:"
           find ./pkg/assets/css -name "*.css" | sort
+          
+      - name: Create 404 page
+        run: |
+          if [ ! -f "404.html" ]; then
+            echo '<!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>404 - Page Not Found | Ziggy</title>
+                <link rel="stylesheet" href="pkg/assets/css/main.css">
+                <style>
+                    body { display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+                    .container { max-width: 600px; padding: 20px; }
+                    h1 { color: var(--primary-color); }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>404 - Page Not Found</h1>
+                    <p>Sorry, but the page you were looking for could not be found.</p>
+                    <a href="index.html" class="btn">Return Home</a>
+                </div>
+            </body>
+            </html>' > 404.html
+            echo "✅ Created 404.html page"
+          fi
+
+      - name: Ensure index.html exists
+        run: |
+          if [ ! -f "index.html" ]; then
+            if [ -f "index.php.html" ]; then
+              cp index.php.html index.html
+              echo "✅ Copied index.php.html to index.html"
+            else
+              echo '<!DOCTYPE html>
+              <html>
+              <head>
+                  <meta charset="utf-8">
+                  <title>Welcome to Ziggy</title>
+                  <meta http-equiv="refresh" content="0;url=index.php.html">
+              </head>
+              <body>
+                  <p>Redirecting to <a href="index.php.html">homepage</a>...</p>
+              </body>
+              </html>' > index.html
+              echo "✅ Created redirect index.html"
+            fi
+          fi
+
+      - name: Fix paths in HTML files
+        run: |
+          # Optional: Fix any paths in HTML files that might be broken after PHP conversion
+          find . -name "*.html" -type f -exec sed -i 's/href="\([^"]*\)\.php"/href="\1.php.html"/g' {} \;
+          find . -name "*.html" -type f -exec sed -i 's/action="\([^"]*\)\.php"/action="\1.php.html"/g' {} \;
+          
+      - name: Verify file structure
+        run: |
+          echo "Final file structure:"
+          find . -type f -not -path "./node_modules/*" -not -path "./.git/*" | sort
+          
+          echo "\nVerifying key files exist:"
+          for file in "index.html" "404.html" "pkg/assets/js/main.js" "pkg/assets/css/main.css"; do
+            if [ -f "$file" ]; then
+              echo "✅ $file exists"
+            else
+              echo "❌ $file missing"
+            fi
+          done
           
       - name: Setup Pages
         uses: actions/configure-pages@v5
