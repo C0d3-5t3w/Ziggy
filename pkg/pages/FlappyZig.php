@@ -70,7 +70,8 @@ header("timezone: PMT");
                 <li><a href="about.html">About</a></li>
                 <li><a href="pictures.html">Pictures</a></li>
                 <li><a href="FlappyZig.html">Flappy Zig</a></li>
-                <!-- <li><a href="znek.html">Znek</a></li> -->
+                <li><a href="znek.html">Znek</a></li>
+                <li><a href="ZigWalk.html">ZigWalk</a></li>
             </ul>
         </div>
     </footer>

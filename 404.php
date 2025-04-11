@@ -8,9 +8,9 @@
             <div class="card">
                 <div class="card-content" style="text-align: center;">
                     <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-                    <img src="pkg/assets/images/ziggy-sad.png" alt="Sad Ziggy" style="max-width: 200px; margin: 30px auto;">
+                    <img src="pkg/assets/images/z1.png" style="max-width: 200px; margin: 30px auto;">
                     <p>Let's get you back to a working page!</p>
-                    <a href="/" class="btn">Go to Homepage</a>
+                    <a href="./index.html" class="btn">Go to Homepage</a>
                 </div>
             </div>
         </div>

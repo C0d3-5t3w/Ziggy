@@ -114,7 +114,7 @@ if ($hour >= 5 && $hour < 10) {
                 <li class="nav-item"><a href="pkg/pages/about.html" class="nav-link">About</a></li>
                 <li class="nav-item"><a href="pkg/pages/pictures.html" class="nav-link">Pictures</a></li>
                 <li class="nav-item"><a href="pkg/pages/FlappyZig.html" class="nav-link">Flappy Zig</a></li>
-                <!-- <li class="nav-item"><a href="pkg/pages/znek.html" class="nav-link">Znek</a></li> -->
+                <li class="nav-item"><a href="pkg/pages/znek.html" class="nav-link">Znek</a></li>
                 <li class="nav-item"><a href="pkg/pages/ZigWalk.html" class="nav-link">ZigWalk</a></li>
             </ul>
         </div>
@@ -191,7 +191,7 @@ if ($hour >= 5 && $hour < 10) {
                 <li><a href="pkg/pages/about.html">About</a></li>
                 <li><a href="pkg/pages/pictures.html">Pictures</a></li>
                 <li><a href="pkg/pages/FlappyZig.html">Flappy Zig</a></li>
-                <!-- <li><a href="pkg/pages/znek.html">Znek</a></li> -->
+                <li><a href="pkg/pages/znek.html">Znek</a></li>
                 <li><a href="pkg/pages/ZigWalk.html">ZigWalk</a></li>
             </ul>
         </div>

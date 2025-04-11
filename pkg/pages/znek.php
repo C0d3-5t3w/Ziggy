@@ -506,5 +506,17 @@ header("timezone: PMT");
             }
         });
     </script>
+    <footer>
+        <div class="container">
+            <ul class="footer-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="pkg/pages/about.html">About</a></li>
+                <li><a href="pkg/pages/pictures.html">Pictures</a></li>
+                <li><a href="pkg/pages/FlappyZig.html">Flappy Zig</a></li>
+                <li><a href="pkg/pages/znek.html">Znek</a></li>
+                <li><a href="pkg/pages/ZigWalk.html">ZigWalk</a></li>
+            </ul>
+        </div>
+    </footer>
 </body>
 </html>
