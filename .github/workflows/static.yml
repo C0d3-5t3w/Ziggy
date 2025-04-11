@@ -58,8 +58,9 @@ jobs:
         run: |
           echo '{
             "compilerOptions": {
-              "target": "ES6",
-              "module": "None",
+              "target": "es2015",
+              "lib": ["dom", "es2015", "es2016", "es2017"],
+              "module": "commonjs",
               "outDir": "./pkg/assets/js",
               "rootDir": "./pkg/assets/ts",
               "strict": true,
@@ -67,7 +68,8 @@ jobs:
               "skipLibCheck": true,
               "forceConsistentCasingInFileNames": true
             },
-            "include": ["./pkg/assets/ts/**/*"]
+            "include": ["./pkg/assets/ts/**/*"],
+            "exclude": ["node_modules"]
           }' > tsconfig.json
       
       - name: List TypeScript files

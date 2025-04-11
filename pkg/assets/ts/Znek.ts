@@ -1,3 +1,31 @@
+if (!Math.sign) {
+  Math.sign = function(x: number): number {
+    return x > 0 ? 1 : x < 0 ? -1 : x === 0 ? 0 : NaN;
+  };
+}
+
+if (!Array.prototype.findIndex) {
+  Object.defineProperty(Array.prototype, 'findIndex', {
+    value: function<T>(predicate: (value: T, index: number, obj: T[]) => boolean): number {
+      if (this == null) throw new TypeError('Array.prototype.findIndex called on null or undefined');
+      if (typeof predicate !== 'function') throw new TypeError('predicate must be a function');
+      
+      const list = Object(this);
+      const length = list.length >>> 0;
+      const thisArg = arguments[1];
+      
+      for (let i = 0; i < length; i++) {
+        if (predicate.call(thisArg, list[i], i, list)) {
+          return i;
+        }
+      }
+      return -1;
+    },
+    configurable: true,
+    writable: true
+  });
+}
+
 interface GameConstants {
     GRID_SIZE: number;
     SNAKE_HEAD_SIZE: number;
