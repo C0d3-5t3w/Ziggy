@@ -32,6 +32,7 @@ header("timezone: PMT");
                 <li class="nav-item"><a href="pictures.html" class="nav-link">Pictures</a></li>
                 <li class="nav-item"><a href="FlappyZig.html" class="nav-link">Flappy Zig</a></li>
                 <!-- <li class="nav-item"><a href="znek.html" class="nav-link">Znek</a></li> -->
+                <li class="nav-item"><a href="ZigWalk.html" class="nav-link">ZigWalk</a></li>
             </ul>
         </div>
     </header>
@@ -125,6 +126,7 @@ header("timezone: PMT");
                 <li><a href="pictures.html">Pictures</a></li>
                 <li><a href="FlappyZig.html">Flappy Zig</a></li>
                 <!-- <li><a href="znek.html">Znek</a></li> -->
+                <li><a href="ZigWalk.html">ZigWalk</a></li>
             </ul>
         </div>
     </footer>
