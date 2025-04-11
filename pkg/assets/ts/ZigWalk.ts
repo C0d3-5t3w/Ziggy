@@ -3,6 +3,7 @@ declare namespace THREE {
     background: Color;
     add(object: Object3D): this;
     remove(object: Object3D): this;
+    traverse(callback: (object: Object3D) => void): void;
   }
   
   class PerspectiveCamera extends Object3D {
@@ -32,6 +33,7 @@ declare namespace THREE {
     b: number;
     set(color: string | number): this;
     setRGB(r: number, g: number, b: number): this;
+    getHex(): number;
   }
   
   class Vector3 {
@@ -46,6 +48,7 @@ declare namespace THREE {
     equals(v: Vector3): boolean;
     lerp(v: Vector3, alpha: number): this;
     normalize(): this;
+    distanceTo(v: Vector3): number;
   }
   
   class Euler {
@@ -92,6 +95,9 @@ declare namespace THREE {
       position: BufferAttribute;
     };
     clone(): BufferGeometry;
+    scale(x: number, y: number, z: number): this;
+    translate(x: number, y: number, z: number): this;
+    rotateX(angle: number): this;
   }
   
   class BufferAttribute {
@@ -250,7 +256,7 @@ namespace GameConfig {
   });
 
   export const VISUALS = Object.freeze({
-    SKY_COLOR: 0x87CEEB,
+    SKY_COLOR: 0x000000,
     GROUND_COLOR: 0x3A4C40,
     PLAYER_COLOR: 0xA9A9A9,
     TREE_TRUNK_COLOR: 0x654321,
@@ -293,6 +299,20 @@ namespace GameConfig {
     WING_FLAP_SPEED: 0.2,
     MAX_WING_ANGLE: Math.PI / 6,
     COLORS: [0x3366ff, 0x22aa22, 0xaa2222, 0xddbb33, 0xb555ff]
+  });
+
+  export const SQUIRRELS = Object.freeze({
+    COUNT: 30,
+    MIN_HEIGHT: 0,
+    MAX_HEIGHT: 3,
+    MIN_SPEED: 0.03,
+    MAX_SPEED: 0.12,
+    COLORS: [0x8B4513, 0xA0522D, 0xCD853F],
+    TAIL_MOVE_SPEED: 0.15,
+    MAX_TAIL_ANGLE: Math.PI / 4,
+    JUMP_PROBABILITY: 0.02,
+    JUMP_HEIGHT: 1.5,
+    JUMP_DURATION: 500
   });
 }
 
@@ -472,6 +492,258 @@ class Bird {
   }
 }
 
+class Squirrel {
+  public group: THREE.Group;
+  private body: THREE.Mesh;
+  private tail: THREE.Mesh;
+  private speed: number;
+  private direction: THREE.Vector3;
+  private tailTime: number = 0;
+  private jumping: boolean = false;
+  private jumpStartTime: number = 0;
+  private jumpStartY: number = 0;
+  private currentTree: THREE.Object3D | null = null;
+  private nextChangeTime: number = 0;
+  private isFriendly: boolean = true;
+
+  constructor() {
+    this.group = new THREE.Group();
+    this.speed = GameConfig.SQUIRRELS.MIN_SPEED + 
+                Math.random() * (GameConfig.SQUIRRELS.MAX_SPEED - GameConfig.SQUIRRELS.MIN_SPEED);
+    
+    const angle = Math.random() * Math.PI * 2;
+    this.direction = new THREE.Vector3(
+      Math.cos(angle),
+      0,
+      Math.sin(angle)
+    ).normalize();
+
+    const squirrelColor = GameConfig.SQUIRRELS.COLORS[
+      Math.floor(Math.random() * GameConfig.SQUIRRELS.COLORS.length)
+    ];
+    
+    const bodyGeometry = new THREE.SphereGeometry(0.25, 8, 8);
+    bodyGeometry.scale(1, 0.8, 1.2);
+    const bodyMaterial = new THREE.MeshStandardMaterial({ 
+      color: squirrelColor,
+      roughness: 0.8
+    });
+    
+    this.body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    this.body.castShadow = true;
+    this.group.add(this.body);
+    
+    const headGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+    const headMaterial = new THREE.MeshStandardMaterial({
+      color: squirrelColor,
+      roughness: 0.7
+    });
+    
+    const head = new THREE.Mesh(headGeometry, headMaterial);
+    head.position.z = 0.25;
+    head.position.y = 0.1;
+    head.castShadow = true;
+    this.group.add(head);
+    
+    const earGeometry = new THREE.ConeGeometry(0.06, 0.1, 4);
+    const earMaterial = new THREE.MeshStandardMaterial({
+      color: squirrelColor,
+      roughness: 0.7
+    });
+    
+    const leftEar = new THREE.Mesh(earGeometry, earMaterial);
+    leftEar.position.set(-0.08, 0.22, 0.25);
+    leftEar.rotation.x = -Math.PI / 6;
+    this.group.add(leftEar);
+    
+    const rightEar = new THREE.Mesh(earGeometry, earMaterial);
+    rightEar.position.set(0.08, 0.22, 0.25);
+    rightEar.rotation.x = -Math.PI / 6;
+    this.group.add(rightEar);
+    
+    const tailGeometry = new THREE.CylinderGeometry(0.05, 0.1, 0.4, 8);
+    tailGeometry.translate(0, 0.2, 0);
+    tailGeometry.rotateX(Math.PI / 4);
+    const tailMaterial = new THREE.MeshStandardMaterial({
+      color: squirrelColor,
+      roughness: 0.9
+    });
+    
+    this.tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    this.tail.position.set(0, 0, -0.25);
+    this.tail.castShadow = true;
+    this.group.add(this.tail);
+    
+    const eyeGeometry = new THREE.SphereGeometry(0.03, 8, 8);
+    const eyeMaterial = new THREE.MeshStandardMaterial({
+      color: 0x222222,
+      roughness: 0.5
+    });
+    
+    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    leftEye.position.set(-0.06, 0.15, 0.38);
+    this.group.add(leftEye);
+    
+    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    rightEye.position.set(0.06, 0.15, 0.38);
+    this.group.add(rightEye);
+    
+    const noseGeometry = new THREE.SphereGeometry(0.02, 8, 8);
+    const noseMaterial = new THREE.MeshStandardMaterial({
+      color: 0x000000,
+      roughness: 0.5
+    });
+    
+    const nose = new THREE.Mesh(noseGeometry, noseMaterial);
+    nose.position.set(0, 0.1, 0.4);
+    this.group.add(nose);
+    
+    const legGeometry = new THREE.CylinderGeometry(0.03, 0.03, 0.2, 8);
+    const legMaterial = new THREE.MeshStandardMaterial({
+      color: squirrelColor,
+      roughness: 0.8
+    });
+    
+    const frontLeftLeg = new THREE.Mesh(legGeometry, legMaterial);
+    frontLeftLeg.position.set(-0.15, -0.15, 0.15);
+    frontLeftLeg.castShadow = true;
+    this.group.add(frontLeftLeg);
+    
+    const frontRightLeg = new THREE.Mesh(legGeometry, legMaterial);
+    frontRightLeg.position.set(0.15, -0.15, 0.15);
+    frontRightLeg.castShadow = true;
+    this.group.add(frontRightLeg);
+    
+    const backLeftLeg = new THREE.Mesh(legGeometry, legMaterial);
+    backLeftLeg.position.set(-0.15, -0.15, -0.15);
+    backLeftLeg.castShadow = true;
+    this.group.add(backLeftLeg);
+    
+    const backRightLeg = new THREE.Mesh(legGeometry, legMaterial);
+    backRightLeg.position.set(0.15, -0.15, -0.15);
+    backRightLeg.castShadow = true;
+    this.group.add(backRightLeg);
+    
+    this.placeRandomly();
+    
+    this.nextChangeTime = performance.now() + 2000 + Math.random() * 3000;
+  }
+  
+  private placeRandomly(): void {
+    const worldSize = Math.max(GameConfig.WORLD.GROUND_WIDTH, GameConfig.WORLD.GROUND_LENGTH);
+    const randomX = (Math.random() * worldSize * 0.8) - (worldSize * 0.4);
+    const randomZ = (Math.random() * -worldSize * 0.8);
+    
+    const height = Math.random() > 0.5 ? 
+      0.25 : 
+      GameConfig.SQUIRRELS.MIN_HEIGHT + Math.random() * (GameConfig.SQUIRRELS.MAX_HEIGHT - GameConfig.SQUIRRELS.MIN_HEIGHT);
+    
+    this.group.position.set(randomX, height, randomZ);
+    this.group.rotation.y = Math.random() * Math.PI * 2;
+  }
+  
+  update(deltaTime: number, trees: THREE.Object3D[]): void {
+    const now = performance.now();
+    
+    this.tailTime += deltaTime * GameConfig.SQUIRRELS.TAIL_MOVE_SPEED;
+    const tailAngle = Math.sin(this.tailTime) * GameConfig.SQUIRRELS.MAX_TAIL_ANGLE;
+    this.tail.rotation.x = Math.PI / 4 + tailAngle;
+    
+    if (this.jumping) {
+      const jumpProgress = (now - this.jumpStartTime) / GameConfig.SQUIRRELS.JUMP_DURATION;
+      
+      if (jumpProgress >= 1) {
+        this.jumping = false;
+        this.group.position.y = this.jumpStartY;
+      } else {
+        const jumpHeight = GameConfig.SQUIRRELS.JUMP_HEIGHT * Math.sin(jumpProgress * Math.PI);
+        this.group.position.y = this.jumpStartY + jumpHeight;
+      }
+    } else if (Math.random() < GameConfig.SQUIRRELS.JUMP_PROBABILITY * deltaTime / 16) {
+      this.startJump();
+    }
+    
+    if (now > this.nextChangeTime) {
+      this.changeDirection();
+      this.nextChangeTime = now + 2000 + Math.random() * 3000;
+    }
+    
+    this.group.position.x += this.direction.x * this.speed * deltaTime;
+    this.group.position.z += this.direction.z * this.speed * deltaTime;
+    
+    if (this.direction.x !== 0 || this.direction.z !== 0) {
+      const targetRotation = Math.atan2(this.direction.x, this.direction.z);
+      this.group.rotation.y = targetRotation;
+    }
+    
+    const margin = 20;
+    const worldHalfWidth = GameConfig.WORLD.GROUND_WIDTH / 2 - margin;
+    const worldHalfLength = GameConfig.WORLD.GROUND_LENGTH / 2 - margin;
+    
+    if (this.group.position.x > worldHalfWidth) {
+      this.group.position.x = worldHalfWidth;
+      this.changeDirection();
+    } else if (this.group.position.x < -worldHalfWidth) {
+      this.group.position.x = -worldHalfWidth;
+      this.changeDirection();
+    }
+    
+    if (this.group.position.z > margin) {
+      this.group.position.z = margin;
+      this.changeDirection();
+    } else if (this.group.position.z < -worldHalfLength) {
+      this.group.position.z = -worldHalfLength;
+      this.changeDirection();
+    }
+    
+    this.checkForTrees(trees);
+  }
+  
+  private startJump(): void {
+    if (!this.jumping) {
+      this.jumping = true;
+      this.jumpStartTime = performance.now();
+      this.jumpStartY = this.group.position.y;
+    }
+  }
+  
+  private changeDirection(): void {
+    const angle = Math.random() * Math.PI * 2;
+    this.direction.x = Math.cos(angle);
+    this.direction.z = Math.sin(angle);
+    this.direction.normalize();
+  }
+  
+  private checkForTrees(trees: THREE.Object3D[]): void {
+    if (Math.random() > 0.05) return;
+    
+    const nearbyTrees = trees.filter(tree => {
+      const distance = this.group.position.distanceTo(tree.position);
+      return distance < 3;
+    });
+    
+    if (nearbyTrees.length > 0 && Math.random() > 0.7) {
+      const targetTree = nearbyTrees[Math.floor(Math.random() * nearbyTrees.length)];
+      
+      this.direction.x = targetTree.position.x - this.group.position.x;
+      this.direction.z = targetTree.position.z - this.group.position.z;
+      this.direction.normalize();
+      
+      const distance = this.group.position.distanceTo(targetTree.position);
+      if (distance < 0.5) {
+        this.currentTree = targetTree;
+        this.group.position.x = targetTree.position.x + (Math.random() - 0.5) * 0.3;
+        this.group.position.z = targetTree.position.z + (Math.random() - 0.5) * 0.3;
+        this.group.position.y = 1 + Math.random() * 2;
+      }
+    } else if (this.currentTree && Math.random() > 0.95) {
+      this.currentTree = null;
+      this.group.position.y = 0.25;
+      this.startJump(); 
+    }
+  }
+}
+
 class ZigWalk {
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
@@ -485,6 +757,7 @@ class ZigWalk {
   private skybox!: THREE.Object3D;
   private particles: Particle[] = [];
   private birds: Bird[] = [];
+  private squirrels: Squirrel[] = [];
   
   private gameState: GameState = {
     score: 0,
@@ -536,6 +809,7 @@ class ZigWalk {
     this.setupMobileControls();
     this.initEnvironment();
     this.initBirds();
+    this.initSquirrels();
     this.gameLoop(0);
   }
   
@@ -579,7 +853,8 @@ class ZigWalk {
       exponent: { value: 0.6 }
     };
     
-    const skyGeo = new THREE.SphereGeometry(400, 32, 15);
+    const skyboxRadius = Math.max(GameConfig.WORLD.GROUND_WIDTH, GameConfig.WORLD.GROUND_LENGTH) * 1.5;
+    const skyGeo = new THREE.SphereGeometry(skyboxRadius, 32, 15);
     const skyMat = new THREE.ShaderMaterial({
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
@@ -685,8 +960,13 @@ class ZigWalk {
       }
       
       const angle = (i / GameConfig.WORLD.MOUNTAIN_COUNT) * Math.PI * 2;
-      const minDistance = 120;
-      const maxDistance = 200;
+      
+      const groundHalfWidth = GameConfig.WORLD.GROUND_WIDTH / 2;
+      const groundHalfLength = GameConfig.WORLD.GROUND_LENGTH / 2;
+      
+      const minDistance = Math.max(groundHalfWidth, groundHalfLength) * 0.8;
+      const maxDistance = minDistance * 1.2;
+      
       const distance = minDistance + Math.random() * (maxDistance - minDistance);
       mountainGroup.position.x = Math.cos(angle) * distance;
       mountainGroup.position.y = 0;
@@ -1337,20 +1617,12 @@ class ZigWalk {
     
     let isMoving = false;
     
-    if ((this.keys['ArrowLeft'] || this.keys['a'] || this.mobileControls.left) && 
-        this.player.position.x > GameConfig.WORLD.BOUNDARY_LEFT) {
-      this.player.position.x -= movementSpeed;
-      this.playerTargetRotation = Math.PI + Math.PI / 4;
+    if (this.keys['ArrowLeft'] || this.keys['a'] || this.mobileControls.left) {
+      this.playerTargetRotation += GameConfig.CAMERA.ROTATION_SPEED * deltaTime;
       isMoving = true;
-    } else if ((this.keys['ArrowRight'] || this.keys['d'] || this.mobileControls.right) && 
-        this.player.position.x < GameConfig.WORLD.BOUNDARY_RIGHT) {
-      this.player.position.x += movementSpeed;
-      this.playerTargetRotation = Math.PI - Math.PI / 4;
+    } else if (this.keys['ArrowRight'] || this.keys['d'] || this.mobileControls.right) {
+      this.playerTargetRotation -= GameConfig.CAMERA.ROTATION_SPEED * deltaTime;
       isMoving = true;
-    } else if ((this.keys['ArrowUp'] || this.keys['w'] || this.mobileControls.forward)) {
-      this.playerTargetRotation = Math.PI;
-    } else if ((this.keys['ArrowDown'] || this.keys['s'] || this.mobileControls.backward)) {
-      this.playerTargetRotation = 0;
     }
     
     this.player.rotation.y += (this.playerTargetRotation - this.player.rotation.y) * 0.1;
@@ -1358,17 +1630,33 @@ class ZigWalk {
     if ((this.keys['ArrowUp'] || this.keys['w'] || this.mobileControls.forward)) {
       const forwardLimit = -GameConfig.WORLD.GROUND_LENGTH + 20;
       if (this.player.position.z > forwardLimit) {
-        this.player.position.z -= movementSpeed * 1.2;
+        const moveX = Math.sin(this.player.rotation.y) * movementSpeed * 1.2;
+        const moveZ = Math.cos(this.player.rotation.y) * movementSpeed * 1.2;
+        this.player.position.x += moveX;
+        this.player.position.z -= moveZ;
         isMoving = true;
       }
     }
     
     if ((this.keys['ArrowDown'] || this.keys['s'] || this.mobileControls.backward)) {
       const backwardLimit = 5;
-      if (this.player.position.z < backwardLimit) {
-        this.player.position.z += movementSpeed * 1.2;
+      const moveX = Math.sin(this.player.rotation.y) * movementSpeed * 1.2;
+      const moveZ = Math.cos(this.player.rotation.y) * movementSpeed * 1.2;
+      
+      const newX = this.player.position.x - moveX;
+      const newZ = this.player.position.z + moveZ;
+      
+      if (newZ < backwardLimit) {
+        this.player.position.x = newX;
+        this.player.position.z = newZ;
         isMoving = true;
       }
+    }
+    
+    if (this.player.position.x < GameConfig.WORLD.BOUNDARY_LEFT) {
+      this.player.position.x = GameConfig.WORLD.BOUNDARY_LEFT;
+    } else if (this.player.position.x > GameConfig.WORLD.BOUNDARY_RIGHT) {
+      this.player.position.x = GameConfig.WORLD.BOUNDARY_RIGHT;
     }
     
     if (isMoving && !this.gameState.playerJumping && this.player.position.y <= GameConfig.PLAYER.START_Y + 0.1) {
@@ -1587,6 +1875,12 @@ class ZigWalk {
       obstacle.baseX = obstacle.mesh.position.x;
     });
     
+    this.squirrels.forEach(squirrel => {
+      this.scene.remove(squirrel.group);
+    });
+    this.squirrels = [];
+    this.initSquirrels();
+    
     this.mobileControls = {
       left: false,
       right: false,
@@ -1615,6 +1909,7 @@ class ZigWalk {
     this.updateParticles(deltaTime);
     this.updateClouds(deltaTime);
     this.updateBirds(deltaTime);
+    this.updateSquirrels(deltaTime);
     this.updateCamera();
     
     this.renderer.render(this.scene, this.camera);
@@ -1897,6 +2192,38 @@ class ZigWalk {
       bird.update(deltaTime);
     });
   }
+
+  private initSquirrels(): void {
+    for (let i = 0; i < GameConfig.SQUIRRELS.COUNT; i++) {
+      const squirrel = new Squirrel();
+      this.squirrels.push(squirrel);
+      this.scene.add(squirrel.group);
+    }
+  }
+
+  private updateSquirrels(deltaTime: number): void {
+    const trees: THREE.Object3D[] = [];
+    this.scene.traverse(object => {
+      if (
+        object instanceof THREE.Group && 
+        object.children.length > 0 && 
+        object.children.some(child => 
+          child instanceof THREE.Mesh && 
+          child.material instanceof THREE.MeshStandardMaterial && 
+          child.material.color && 
+          (child.material.color instanceof THREE.Color ? 
+            child.material.color.getHex() === GameConfig.VISUALS.TREE_TRUNK_COLOR :
+            child.material.color === GameConfig.VISUALS.TREE_TRUNK_COLOR)
+        )
+      ) {
+        trees.push(object);
+      }
+    });
+    
+    this.squirrels.forEach(squirrel => {
+      squirrel.update(deltaTime, trees);
+    });
+  }
 }
 
 class Particle {
@@ -1920,7 +2247,7 @@ class Particle {
     const angle = Math.random() * Math.PI * 2;
     const speed = GameConfig.FX.PARTICLE_SPEED * (0.5 + Math.random());
     this.velocity = new THREE.Vector3(
-      Math.cos(angle) * speed,
+      Math.cos(angle),
       0.5 + Math.random() * speed * 2,
       Math.sin(angle) * speed
     );
