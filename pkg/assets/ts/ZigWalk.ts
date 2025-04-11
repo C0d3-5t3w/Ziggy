@@ -257,7 +257,7 @@ namespace GameConfig {
   });
 
   export const VISUALS = Object.freeze({
-    SKY_COLOR: 0x0000ff,
+    SKY_COLOR: 0x0000FF,
     GROUND_COLOR: 0x3A4C40,
     PLAYER_COLOR: 0xA9A9A9,
     TREE_TRUNK_COLOR: 0x654321,
