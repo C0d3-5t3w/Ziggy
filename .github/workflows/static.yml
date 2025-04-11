@@ -1,20 +1,28 @@
+# Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
+  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -28,186 +36,110 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          
-      - name: Install dependencies
-        run: |
-          npm init -y
-          npm install -g sass
-          npm install --save-dev terser eslint typescript
-          
-      - name: Create eslint config
-        run: |
-          echo '{
-            "env": {
-              "browser": true,
-              "es2021": true
-            },
-            "extends": "eslint:recommended",
-            "parserOptions": {
-              "ecmaVersion": 2021,
-              "sourceType": "module"
-            }
-          }' > .eslintrc.json
-          
-      - name: Create tsconfig.json
-        run: |
-          echo '{
-            "compilerOptions": {
-              "target": "ES6",
-              "module": "ES2020",
-              "outDir": "./pkg/assets/js",
-              "rootDir": "./pkg/assets/ts",
-              "strict": true,
-              "esModuleInterop": true,
-              "skipLibCheck": true,
-              "forceConsistentCasingInFileNames": true
-            },
-            "include": ["./pkg/assets/ts/**/*"],
-            "exclude": ["node_modules"]
-          }' > tsconfig.json
       
-      - name: List TypeScript files
-        run: |
-          echo "Found TypeScript files:"
-          find ./pkg/assets/ts -name "*.ts" | sort
-      
-      - name: Compile TypeScript
-        run: |
-          mkdir -p pkg/assets/js
-          echo "Compiling TypeScript files..."
-          
-          echo "Running TSC with full configuration..."
-          npx tsc
-          
-          if [ $? -ne 0 ]; then
-            echo "TypeScript compilation failed with tsc. Trying alternative method."
-            
-            find ./pkg/assets/ts -name "*.ts" | while read -r file; do
-              echo "Individually compiling $file"
-              outfile="./pkg/assets/js/$(basename "${file%.ts}.js")"
-              outdir=$(dirname "$outfile")
-              mkdir -p "$outdir"
-              
-              if [ -f "$outfile" ]; then
-                echo "Removing existing file: $outfile"
-                rm "$outfile"
-              fi
-              
-              echo "Compiling $file to $outfile..."
-              npx tsc "$file" --outDir "$outdir" --target ES6 --module ES2020
-            done
-          fi
-          
-      - name: Verify JavaScript output
-        run: |
-          echo "Generated JavaScript files:"
-          find ./pkg/assets/js -name "*.js" | sort
-          
-          ts_files=$(find ./pkg/assets/ts -name "*.ts" | wc -l)
-          js_files=$(find ./pkg/assets/js -name "*.js" | wc -l)
-          echo "TypeScript files count: $ts_files"
-          echo "JavaScript files count: $js_files"
-          
-          for critical_file in "Znek" "FlappyZig" "main" "ZigWalk" "dropdown" "animations"; do
-            if [ -f "./pkg/assets/ts/${critical_file}.ts" ] && [ ! -f "./pkg/assets/js/${critical_file}.js" ]; then
-              echo "⚠️ Critical file missing: ${critical_file}.js - attempting direct compilation"
-              npx tsc ./pkg/assets/ts/${critical_file}.ts --outFile ./pkg/assets/js/${critical_file}.js --target ES6 --module None
-            elif [ -f "./pkg/assets/js/${critical_file}.js" ]; then
-              echo "✅ Critical file exists: ./pkg/assets/js/${critical_file}.js"
-              ls -la "./pkg/assets/js/${critical_file}.js"
-              echo "File content preview (first 5 lines):"
-              head -n 5 "./pkg/assets/js/${critical_file}.js"
-            else
-              echo "⚠️ Critical TS file not found: ./pkg/assets/ts/${critical_file}.ts"
-            fi
-          done
-          
-      - name: Minify JavaScript with timestamp versioning
-        run: |
-          BUILD_TIMESTAMP=$(date +%s)
-          echo "Using build timestamp: $BUILD_TIMESTAMP for versioning"
-          
-          find ./pkg/assets/js -name "*.js" | while read -r file; do
-            if [ -f "$file" ]; then
-              echo "Minifying $file"
-              
-              cp "$file" "${file}.backup"
-              
-              echo "/* Build: ${BUILD_TIMESTAMP} - $(date) */" > "${file}.versioned"
-              cat "${file}.backup" >> "${file}.versioned"
-              
-              npx terser "${file}.versioned" \
-                --compress \
-                --mangle \
-                --output "${file}.min.js"
-                
-              if [ -f "${file}.min.js" ]; then
-                echo "/* Build: ${BUILD_TIMESTAMP} - $(date) */" > "${file}.temp"
-                cat "${file}.min.js" >> "${file}.temp"
-                mv "${file}.temp" "$file"
-                
-                echo "✅ Successfully minified and versioned $file"
-                head -n 3 "$file"
-                
-                rm -f "${file}.versioned" "${file}.backup" "${file}.min.js"
-              else
-                echo "⚠️ Warning: Minification of $file failed, keeping original"
-                mv "${file}.backup" "$file"
-                rm -f "${file}.versioned"
-              fi
-            fi
-          done
-      
-      - name: Verify ZigWalk.js specifically
-        run: |
-          ZIGWALK_FILE="./pkg/assets/js/ZigWalk.js"
-          if [ -f "$ZIGWALK_FILE" ]; then
-            echo "ZigWalk.js exists and has size:"
-            ls -la "$ZIGWALK_FILE"
-            
-            if [ -f "./pkg/pages/ZigWalk.php.html" ]; then
-              echo "Adding no-cache meta tags to ZigWalk.php.html"
-              sed -i 's/<head>/<head>\n    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" \/>\n    <meta http-equiv="Pragma" content="no-cache" \/>\n    <meta http-equiv="Expires" content="0" \/>/' "./pkg/pages/ZigWalk.php.html"
-            fi
-            
-            find . -name "*.html" -type f -exec sed -i "s/ZigWalk.js/ZigWalk.js?v=$(date +%s)/g" {} \;
-          else
-            echo "❌ CRITICAL ERROR: ZigWalk.js does not exist!"
-            exit 1
-          fi
-          
       - name: Process PHP files
         run: |
-          echo "Listing all PHP files found in repository:"
-          find . -type f -name "*.php" | sort
+          echo "Processing PHP files to HTML..."
+          mkdir -p build
           
-          echo "Processing PHP files..."
-          find . -type f -name "*.php" -exec sh -c '
-            outfile="${1%.php}.html"
-            outdir=$(dirname "$outfile")
-            mkdir -p "$outdir"
-            echo "Converting $1 to $outfile"
-            php "$1" > "$outfile"
-          ' sh {} \;
+          # Function to process PHP files
+          process_php_file() {
+            local input_file=$1
+            local output_file=$2
+            if [ -f "$input_file" ]; then
+              echo "Processing $input_file to $output_file"
+              # Use PHP to render the file
+              php -f "$input_file" > "$output_file"
+              if [ $? -eq 0 ]; then
+                echo "✅ Successfully processed $input_file"
+              else
+                echo "❌ Failed to process $input_file"
+                exit 1
+              fi
+            else
+              echo "❌ Source file $input_file not found"
+              exit 1
+            fi
+          }
           
-          echo "Verifying conversion - HTML files created:"
-          find . -type f -name "*.html" | grep -v "node_modules" | sort
+          # Process root files
+          process_php_file "index.php" "index.html"
           
-      - name: Fix paths in HTML files with cache busting
+          # Process 404 page
+          process_php_file "404.php" "404.html"
+          
+          # Create directories as needed
+          mkdir -p build/pkg/pages
+          
+          # Process other pages
+          for file in pkg/pages/*.php; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file" .php)
+              process_php_file "$file" "build/$filename.html"
+            fi
+          done
+          
+          # Copy static assets
+          cp -r pkg/assets build/
+          
+          # Move HTML files to root for direct access
+          find build -name "*.html" -exec mv {} . \;
+          
+          echo "✅ All PHP files processed successfully"
+      
+      - name: Create 404 page if not exists
         run: |
-          CACHE_BUSTER=$(date +%s)
-          
-          find . -name "*.html" -type f -exec sed -i "s/href=\"\\([^\"]*\\)\\.php\"/href=\"\\1.php.html\"/g" {} \;
-          find . -name "*.html" -type f -exec sed -i "s/action=\"\\([^\"]*\\)\\.php\"/action=\"\\1.php.html\"/g" {} \;
-          find . -name "*.html" -type f -exec sed -i "s/src=\"\\([^\"]*\\)\\.js\"/src=\"\\1.js?v=$CACHE_BUSTER\"/g" {} \;
-          find . -name "*.html" -type f -exec sed -i "s/href=\"\\([^\"]*\\)\\.css\"/href=\"\\1.css?v=$CACHE_BUSTER\"/g" {} \;
-          
-          echo "Added cache busting with timestamp: $CACHE_BUSTER"
+          if [ ! -f "404.html" ]; then
+            echo "Creating 404.html file..."
+            cat > 404.html << 'EOL'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff5722;
+        }
+        .back-link {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404 - Page Not Found</h1>
+        <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+        <a href="/" class="back-link">Go to Homepage</a>
+    </div>
+</body>
+</html>
+EOL
+            echo "✅ 404.html created successfully"
+          else
+            echo "✅ 404.html already exists"
+          fi
           
       - name: Verify file structure
         run: |
@@ -230,7 +162,7 @@ jobs:
               exit 1
             fi
           done
-          
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         
