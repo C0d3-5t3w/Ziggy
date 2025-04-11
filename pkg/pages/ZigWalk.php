@@ -1,6 +1,8 @@
 <?php
 header("Cache-Control: no-cache, must-revalidate");
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); 
+header("Content-Type: text/html; charset=UTF-8");
+header("timezone: PMT");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,8 +10,8 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title class="pride-font">ZigWalk</title>
-    <link rel="stylesheet" href="/pkg/assets/css/ZigWalk.css">
-    <link rel="stylesheet" href="/pkg/assets/css/fonts.css">
+    <link rel="stylesheet" href="../assets/css/ZigWalk.css">
+    <link rel="stylesheet" href="../assets/css/fonts.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -44,16 +46,16 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
         </div>
         <canvas id="game-canvas"></canvas>
     </div>
-    <script src="/pkg/assets/js/ZigWalk.js"></script>
+    <script src="../assets/js/ZigWalk.js"></script>
     <footer>
         <div class="container">
             <ul class="footer-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="pkg/pages/about.html">About</a></li>
-                <li><a href="pkg/pages/pictures.html">Pictures</a></li>
-                <li><a href="pkg/pages/FlappyZig.html">Flappy Zig</a></li>
-                <li><a href="pkg/pages/znek.html">Znek</a></li>
-                <li><a href="pkg/pages/ZigWalk.html">ZigWalk</a></li>
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="pictures.html">Pictures</a></li>
+                <li><a href="FlappyZig.html">Flappy Zig</a></li>
+                <li><a href="znek.html">Znek</a></li>
+                <li><a href="ZigWalk.html">ZigWalk</a></li>
             </ul>
         </div>
     </footer>

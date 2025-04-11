@@ -447,7 +447,7 @@ header("timezone: PMT");
             <div class="shoot-button" data-direction="shoot">🔴</div>
         </div>
     </div>
-    <script src="../assets/js/Znek.js" type="module"></script>
+    <!-- <script src="../assets/js/Znek.js" type="module"></script> -->
     <script>
         document.addEventListener('touchmove', function(e) {
             e.preventDefault();
@@ -506,15 +506,16 @@ header("timezone: PMT");
             }
         });
     </script>
+    <script src="../assets/js/Znek.js" type="module"></script>
     <footer>
         <div class="container">
             <ul class="footer-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="pkg/pages/about.html">About</a></li>
-                <li><a href="pkg/pages/pictures.html">Pictures</a></li>
-                <li><a href="pkg/pages/FlappyZig.html">Flappy Zig</a></li>
-                <li><a href="pkg/pages/znek.html">Znek</a></li>
-                <li><a href="pkg/pages/ZigWalk.html">ZigWalk</a></li>
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="pictures.html">Pictures</a></li>
+                <li><a href="FlappyZig.html">Flappy Zig</a></li>
+                <li><a href="znek.html">Znek</a></li>
+                <li><a href="ZigWalk.html">ZigWalk</a></li>
             </ul>
         </div>
     </footer>
