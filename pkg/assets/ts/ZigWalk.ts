@@ -233,7 +233,7 @@ namespace GameConfig {
     BOUNDARY_LEFT: -50,
     BOUNDARY_RIGHT: 50,
     GROUND_WIDTH: 3000,
-    GROUND_LENGTH: 9000,
+    GROUND_LENGTH: 3000,
     MOUNTAIN_COUNT: 40,
     CLOUD_COUNT: 80,
     FLOWER_COUNT: 800,
@@ -257,7 +257,7 @@ namespace GameConfig {
   });
 
   export const VISUALS = Object.freeze({
-    SKY_COLOR: 0x2E86C1,
+    SKY_COLOR: 0x0000ff,
     GROUND_COLOR: 0x3A4C40,
     PLAYER_COLOR: 0xA9A9A9,
     TREE_TRUNK_COLOR: 0x654321,
