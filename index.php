@@ -103,7 +103,7 @@ if ($hour >= 5 && $hour < 10) {
 <body>
     <header>
         <div class="container nav-container">
-            <a href="index.php" class="logo">ZIGGY<span>!</span></a>
+            <a href="index.html" class="logo">ZIGGY<span>!</span></a>
             
             <div class="hamburger">
                 <span>☰</span>

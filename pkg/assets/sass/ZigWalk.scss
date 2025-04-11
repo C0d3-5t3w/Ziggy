@@ -1,12 +1,15 @@
-$primary-color: #4CAF50;
-$primary-color-hover: #45a049;
-$accent-color: #ff7043;
+$primary-color: #3f51b5;
+$primary-color-hover: #303f9f;
+$accent-color: #ff4081;
 $bg-dark: rgba(0, 0, 0, 0.8);
 $text-light: white;
-$box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+$box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
 $border-radius: 5px;
-$ui-gradient: linear-gradient(135deg, rgba(72, 126, 176, 0.8), rgba(97, 175, 140, 0.8));
-$ui-border: 1px solid rgba(255, 255, 255, 0.2);
+$ui-gradient: linear-gradient(135deg, rgba(63, 81, 181, 0.85), rgba(103, 58, 183, 0.85));
+$ui-border: 1px solid rgba(255, 255, 255, 0.3);
+$glass-effect: blur(8px);
+
+$font-stack: 'Poppins', 'Segoe UI', Arial, sans-serif;
 
 html, body {
   margin: 0;
@@ -14,7 +17,10 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  font-family: $font-stack;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: $text-light;
 }
 
 #game-container {
@@ -34,23 +40,26 @@ html, body {
   color: $text-light;
   font-size: 24px;
   z-index: 10;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   background: $ui-gradient;
-  padding: 8px 18px;
-  border-radius: $border-radius;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  padding: 10px 20px;
+  border-radius: 30px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: $box-shadow;
   border: $ui-border;
-  backdrop-filter: blur(4px);
+  backdrop-filter: $glass-effect;
+  -webkit-backdrop-filter: $glass-effect;
+  letter-spacing: 0.5px;
 }
 
 #score {
   top: 20px;
   left: 20px;
+  font-weight: 600;
   
   &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -58,12 +67,14 @@ html, body {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 18px;
+  font-size: 16px;
   opacity: 0.9;
+  max-width: 90%;
+  text-align: center;
   
   &:hover {
     opacity: 1;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -72,70 +83,83 @@ html, body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(20, 20, 20, 0.85);
+  background: rgba(20, 20, 20, 0.9);
   color: $text-light;
-  padding: 30px 50px;
-  border-radius: 15px;
+  padding: 40px 60px;
+  border-radius: 20px;
   text-align: center;
   z-index: 20;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
   min-width: 320px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: $glass-effect;
+  -webkit-backdrop-filter: $glass-effect;
   border: $ui-border;
   
   h2 {
     margin-top: 0;
     color: $accent-color;
-    font-size: 36px;
+    font-size: 42px;
+    font-weight: 700;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
   }
   
   p {
-    font-size: 20px;
-    margin: 20px 0;
+    font-size: 22px;
+    margin: 25px 0;
+    opacity: 0.9;
+    font-weight: 300;
   }
   
   button {
     background: linear-gradient(135deg, $primary-color, darken($primary-color, 15%));
     color: $text-light;
     border: none;
-    padding: 12px 24px;
+    padding: 14px 32px;
     font-size: 18px;
+    font-weight: 600;
     cursor: pointer;
     border-radius: 30px;
     transition: all 0.3s;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.5px;
     
     &:hover {
       background: linear-gradient(135deg, lighten($primary-color, 5%), $primary-color);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
     }
     
     &:active {
       transform: translateY(1px);
-      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.4), 0 4px 6px rgba(0, 0, 0, 0.2);
     }
   }
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 @keyframes scoreUpdate {
   0% { transform: scale(1); }
-  50% { transform: scale(1.5); color: $accent-color; }
+  50% { transform: scale(1.6); color: $accent-color; text-shadow: 0 0 10px rgba($accent-color, 0.7); }
   100% { transform: scale(1); }
 }
 
 .score-updated {
-  animation: scoreUpdate 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: scoreUpdate 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 #mobile-controls {
   position: absolute;
-  bottom: 20px;
+  bottom: 30px;
   left: 0;
   width: 100%;
   display: flex;
@@ -151,33 +175,38 @@ html, body {
   .control-row {
     display: flex;
     justify-content: center;
-    margin: 10px 0;
+    margin: 12px 0;
     width: 100%;
   }
 
   .mobile-btn {
-    background: $ui-gradient;
+    background: linear-gradient(135deg, rgba($primary-color, 0.6), rgba(darken($primary-color, 15%), 0.6));
     color: $text-light;
-    border: 2px solid rgba(255, 255, 255, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
-    width: 70px;
-    height: 70px;
+    width: 75px;
+    height: 75px;
     font-size: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 10px;
+    margin: 0 12px;
     cursor: pointer;
     transition: all 0.2s;
     pointer-events: auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(4px);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    backdrop-filter: $glass-effect;
+    -webkit-backdrop-filter: $glass-effect;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+    opacity: 0.7;
+    font-weight: bold;
 
-    &:active {
-      background-color: rgba(255, 255, 255, 0.3);
-      transform: scale(0.92) translateY(2px);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    &:active, &.active {
+      background-color: rgba($accent-color, 0.7);
+      transform: scale(0.9) translateY(4px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      opacity: 0.9;
+      border-color: rgba($accent-color, 0.6);
     }
 
     &#mobile-jump {
@@ -186,6 +215,7 @@ html, body {
       font-size: 20px;
       font-weight: bold;
       letter-spacing: 1px;
+      background: linear-gradient(135deg, rgba($accent-color, 0.7), rgba(darken($accent-color, 15%), 0.7));
     }
     
     &#mobile-forward, &#mobile-backward {
@@ -199,24 +229,35 @@ html, body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0);
-  background: $ui-gradient;
+  background: linear-gradient(135deg, rgba($accent-color, 0.8), rgba(darken($accent-color, 15%), 0.8));
   color: $text-light;
-  padding: 15px 30px;
+  padding: 15px 40px;
   border-radius: 50px;
   text-align: center;
   z-index: 15;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
   opacity: 0;
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  font-size: 24px;
+  font-size: 28px;
   border: $ui-border;
   pointer-events: none;
   white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  backdrop-filter: $glass-effect;
+  -webkit-backdrop-filter: $glass-effect;
   
   &.visible {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
+    animation: pulse 1s infinite alternate;
   }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 8px 25px rgba($accent-color, 0.5); }
+  100% { box-shadow: 0 8px 35px rgba($accent-color, 0.8); }
 }
 
 @media (pointer: fine) {
@@ -229,4 +270,51 @@ html, body {
   #instructions {
     display: none;
   }
+}
+
+#loading-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: $bg-dark;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 0.5s ease;
+
+  h2 {
+    color: $text-light;
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: $accent-color;
+    animation: spin 1s ease-in-out infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#fps-counter {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 15px;
+  z-index: 100;
+  font-family: monospace;
 }

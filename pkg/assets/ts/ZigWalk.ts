@@ -790,12 +790,19 @@ class ZigWalk {
   private cameraTargetPosition = new THREE.Vector3();
   private cameraTargetLookAt = new THREE.Vector3();
   private playerTargetRotation = Math.PI;
+  private isBackingUp: boolean = false;
+
+  private fpsCounter: HTMLElement | null = null;
+  private frameCounter = 0;
+  private lastFpsUpdate = 0;
+  private loadingScreen: HTMLElement | null = null;
   
   constructor() {
     this.initGame();
   }
 
   private initGame(): void {
+    this.loadingScreen = document.getElementById('loading-screen');
     this.isTouchDevice = this.detectTouchDevice();
     this.initScene();
     this.initSkybox();
@@ -810,6 +817,19 @@ class ZigWalk {
     this.initEnvironment();
     this.initBirds();
     this.initSquirrels();
+    this.initFpsCounter();
+    
+    setTimeout(() => {
+      if (this.loadingScreen) {
+        this.loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          if (this.loadingScreen) {
+            this.loadingScreen.style.display = 'none';
+          }
+        }, 500);
+      }
+    }, 1000);
+    
     this.gameLoop(0);
   }
   
@@ -1616,12 +1636,13 @@ class ZigWalk {
     const timeSinceLastJump = currentTime - this.gameState.lastJumpTime;
     
     let isMoving = false;
+    this.isBackingUp = false;
     
     if (this.keys['ArrowLeft'] || this.keys['a'] || this.mobileControls.left) {
-      this.playerTargetRotation += GameConfig.CAMERA.ROTATION_SPEED * deltaTime;
+      this.playerTargetRotation += Math.PI / 32; 
       isMoving = true;
     } else if (this.keys['ArrowRight'] || this.keys['d'] || this.mobileControls.right) {
-      this.playerTargetRotation -= GameConfig.CAMERA.ROTATION_SPEED * deltaTime;
+      this.playerTargetRotation -= Math.PI / 32;
       isMoving = true;
     }
     
@@ -1639,9 +1660,10 @@ class ZigWalk {
     }
     
     if ((this.keys['ArrowDown'] || this.keys['s'] || this.mobileControls.backward)) {
+      this.isBackingUp = true;
       const backwardLimit = 5;
-      const moveX = Math.sin(this.player.rotation.y) * movementSpeed * 1.2;
-      const moveZ = Math.cos(this.player.rotation.y) * movementSpeed * 1.2;
+      const moveX = Math.sin(this.player.rotation.y) * movementSpeed * 0.8; 
+      const moveZ = Math.cos(this.player.rotation.y) * movementSpeed * 0.8;
       
       const newX = this.player.position.x - moveX;
       const newZ = this.player.position.z + moveZ;
@@ -1826,6 +1848,7 @@ class ZigWalk {
     
     const gameOverElement = document.getElementById('game-over');
     const finalScoreElement = document.getElementById('final-score');
+    const highScoreElement = document.getElementById('high-score-value');
     
     if (gameOverElement) {
       gameOverElement.classList.remove('hidden');
@@ -1838,9 +1861,19 @@ class ZigWalk {
     const highScore = localStorage.getItem(GameConfig.UI.HIGH_SCORE_KEY) ? 
       parseInt(localStorage.getItem(GameConfig.UI.HIGH_SCORE_KEY)!) : 0;
       
+    if (highScoreElement) {
+      highScoreElement.textContent = highScore.toString();
+    }
+    
     if (this.gameState.score > highScore) {
       localStorage.setItem(GameConfig.UI.HIGH_SCORE_KEY, this.gameState.score.toString());
       this.showMessage('New High Score!');
+      
+      if (highScoreElement) {
+        highScoreElement.textContent = this.gameState.score.toString();
+        highScoreElement.style.color = '#ff4081';
+        highScoreElement.classList.add('score-updated');
+      }
     }
     
     if (this.animationId !== null) {
@@ -1904,6 +1937,7 @@ class ZigWalk {
       return;
     }
     
+    this.updateFpsCounter(timestamp);
     this.movePlayer(deltaTime);
     this.updateObstacles(deltaTime);
     this.updateParticles(deltaTime);
@@ -1920,17 +1954,22 @@ class ZigWalk {
   private updateCamera(): void {
     const angle = this.player.rotation.y;
     
-    const offsetX = Math.sin(angle) * -GameConfig.CAMERA.DISTANCE;
-    const offsetZ = Math.cos(angle) * -GameConfig.CAMERA.DISTANCE;
+    let offsetX = Math.sin(angle) * -GameConfig.CAMERA.DISTANCE;
+    let offsetZ = Math.cos(angle) * -GameConfig.CAMERA.DISTANCE;
+    
+    let lookAheadX = Math.sin(angle) * GameConfig.CAMERA.LOOK_AHEAD;
+    let lookAheadZ = Math.cos(angle) * GameConfig.CAMERA.LOOK_AHEAD;
+    
+    if (this.isBackingUp) {
+      lookAheadX = Math.sin(angle + Math.PI) * GameConfig.CAMERA.LOOK_AHEAD * 0.5;
+      lookAheadZ = Math.cos(angle + Math.PI) * GameConfig.CAMERA.LOOK_AHEAD * 0.5;
+    }
     
     const idealPosition = new THREE.Vector3(
       this.player.position.x + offsetX,
       this.player.position.y + GameConfig.CAMERA.HEIGHT,
       this.player.position.z + offsetZ
     );
-    
-    const lookAheadX = Math.sin(angle) * GameConfig.CAMERA.LOOK_AHEAD;
-    const lookAheadZ = Math.cos(angle) * GameConfig.CAMERA.LOOK_AHEAD;
     
     const idealLookAt = new THREE.Vector3(
       this.player.position.x + lookAheadX,
@@ -1939,8 +1978,12 @@ class ZigWalk {
     );
     
     if (!this.cameraTargetPosition.equals(new THREE.Vector3(0, 0, 0))) {
-      this.cameraTargetPosition.lerp(idealPosition, GameConfig.CAMERA.SMOOTHING);
-      this.cameraTargetLookAt.lerp(idealLookAt, GameConfig.CAMERA.SMOOTHING);
+      const smoothing = this.isBackingUp ? 
+        GameConfig.CAMERA.SMOOTHING * 1.5 : 
+        GameConfig.CAMERA.SMOOTHING;
+        
+      this.cameraTargetPosition.lerp(idealPosition, smoothing);
+      this.cameraTargetLookAt.lerp(idealLookAt, smoothing);
     } else {
       this.cameraTargetPosition.copy(idealPosition);
       this.cameraTargetLookAt.copy(idealLookAt);
@@ -2224,6 +2267,26 @@ class ZigWalk {
       squirrel.update(deltaTime, trees);
     });
   }
+
+  private initFpsCounter(): void {
+    this.fpsCounter = document.getElementById('fps-counter');
+    this.lastFpsUpdate = performance.now();
+    this.frameCounter = 0;
+  }
+  
+  private updateFpsCounter(timestamp: number): void {
+    this.frameCounter++;
+    
+    const elapsed = timestamp - this.lastFpsUpdate;
+    if (elapsed >= 1000) { 
+      if (this.fpsCounter) {
+        const fps = Math.round(this.frameCounter / (elapsed / 1000));
+        this.fpsCounter.textContent = `FPS: ${fps}`;
+      }
+      this.frameCounter = 0;
+      this.lastFpsUpdate = timestamp;
+    }
+  }
 }
 
 class Particle {
@@ -2281,5 +2344,6 @@ class Particle {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  new ZigWalk();
+  new ZigWalk(); 
 });
+// <3

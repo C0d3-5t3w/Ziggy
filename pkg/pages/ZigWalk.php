@@ -10,16 +10,23 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
     <title class="pride-font">ZigWalk</title>
     <link rel="stylesheet" href="/pkg/assets/css/ZigWalk.css">
     <link rel="stylesheet" href="/pkg/assets/css/fonts.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <div id="game-container">
+        <div id="loading-screen">
+            <h2 class="pride-font">Loading ZigWalk</h2>
+            <div class="spinner"></div>
+        </div>
         <div id="score">Score: <span id="score-value">0</span></div>
-        <div id="instructions">Use ↑↓ to move forward/back, ←→ to move sideways, SPACE to jump</div>
+        <div id="fps-counter">FPS: 60</div>
+        <div id="instructions">Use ↑ to move forward, ↓ to back up, ←→ to rotate, SPACE to jump</div>
         <div id="level-up-notification" class="hidden">Level Up! Speed Increased!</div>
         <div id="game-over" class="hidden">
             <h2 class="pride-font">Game Over!</h2>
             <p>Final Score: <span id="final-score">0</span></p>
+            <p id="high-score-display">High Score: <span id="high-score-value">0</span></p>
             <button id="restart-button">Play Again</button>
         </div>
         <div id="mobile-controls" class="hidden">
