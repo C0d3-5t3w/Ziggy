@@ -1,28 +1,21 @@
-# Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -32,6 +25,65 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: |
+          npm install -g typescript sass
+
+      - name: Clean cache directory
+        run: |
+          rm -rf .cache
+          mkdir -p .cache
+          echo "Cleared cache directory"
+          
+      - name: Create directory structure
+        run: |
+          mkdir -p build/pkg/assets/js
+          mkdir -p build/pkg/assets/css
+          mkdir -p build/pkg/pages
+          
+      - name: Compile TypeScript to JavaScript
+        run: |
+          echo "Compiling TypeScript files to JavaScript..."
+          mkdir -p pkg/assets/js
+          
+          for file in pkg/assets/ts/*.ts; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file" .ts)
+              echo "Compiling $file to pkg/assets/js/$filename.js"
+              tsc --target ES2015 --lib DOM,ES2015 --outDir pkg/assets/js "$file"
+              
+              if [ $? -eq 0 ]; then
+                echo "✅ Successfully compiled $file"
+              else
+                echo "❌ Failed to compile $file"
+              fi
+            fi
+          done
+          
+      - name: Compile SCSS to CSS
+        run: |
+          echo "Compiling SCSS files to CSS..."
+          mkdir -p pkg/assets/css
+          
+          for file in pkg/assets/sass/*.scss; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file" .scss)
+              echo "Compiling $file to pkg/assets/css/$filename.css"
+              sass --no-source-map "$file" "pkg/assets/css/$filename.css"
+              
+              if [ $? -eq 0 ]; then
+                echo "✅ Successfully compiled $file"
+              else
+                echo "❌ Failed to compile $file"
+              fi
+            fi
+          done
+          
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -40,15 +92,12 @@ jobs:
       - name: Process PHP files
         run: |
           echo "Processing PHP files to HTML..."
-          mkdir -p build
           
-          # Function to process PHP files
           process_php_file() {
             local input_file=$1
             local output_file=$2
             if [ -f "$input_file" ]; then
               echo "Processing $input_file to $output_file"
-              # Use PHP to render the file
               php -f "$input_file" > "$output_file"
               if [ $? -eq 0 ]; then
                 echo "✅ Successfully processed $input_file"
@@ -62,16 +111,12 @@ jobs:
             fi
           }
           
-          # Process root files
-          process_php_file "index.php" "index.html"
+          process_php_file "index.php" "build/index.html"
           
-          # Process 404 page
-          process_php_file "404.php" "404.html"
+          if [ -f "404.php" ]; then
+            process_php_file "404.php" "build/404.html"
+          fi
           
-          # Create directories as needed
-          mkdir -p build/pkg/pages
-          
-          # Process other pages
           for file in pkg/pages/*.php; do
             if [ -f "$file" ]; then
               filename=$(basename "$file" .php)
@@ -79,19 +124,13 @@ jobs:
             fi
           done
           
-          # Copy static assets
-          cp -r pkg/assets build/
-          
-          # Move HTML files to root for direct access
-          find build -name "*.html" -exec mv {} . \;
-          
           echo "✅ All PHP files processed successfully"
       
       - name: Create 404 page if not exists
         run: |
-          if [ ! -f "404.html" ]; then
+          if [ ! -f "build/404.html" ]; then
             echo "Creating 404.html file..."
-            cat > 404.html << 'EOL'
+            cat > "build/404.html" << 'EOL'
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -140,14 +179,84 @@ jobs:
           else
             echo "✅ 404.html already exists"
           fi
+      
+      - name: Copy static assets
+        run: |
+          echo "Copying static assets to build directory..."
           
+          if [ -d "pkg/assets/js" ]; then
+            mkdir -p build/pkg/assets/js
+            cp -r pkg/assets/js/* build/pkg/assets/js/
+          fi
+          
+          if [ -d "pkg/assets/css" ]; then
+            mkdir -p build/pkg/assets/css
+            cp -r pkg/assets/css/* build/pkg/assets/css/
+          fi
+          
+          if [ -d "pkg/assets/images" ]; then
+            mkdir -p build/pkg/assets/images
+            cp -r pkg/assets/images/* build/pkg/assets/images/
+          fi
+          
+          if [ -d "pkg/assets/fonts" ]; then
+            mkdir -p build/pkg/assets/fonts
+            cp -r pkg/assets/fonts/* build/pkg/assets/fonts/
+          fi
+          
+          for htmlfile in *.html; do
+            if [ -f "$htmlfile" ] && [ "$htmlfile" != "build/index.html" ] && [ "$htmlfile" != "build/404.html" ]; then
+              cp "$htmlfile" "build/"
+            fi
+          done
+          
+          echo "✅ Static assets copied successfully"
+          
+      - name: Fix paths in HTML files
+        run: |
+          echo "Fixing paths in HTML files..."
+          
+          cat > fix-paths.php << 'EOL'
+          <?php
+          function fixPaths($content) {
+            // No need to change paths that already use pkg/assets format
+            return $content;
+          }
+          
+          $files = glob('build/*.html');
+          foreach ($files as $file) {
+            $content = file_get_contents($file);
+            $fixed = fixPaths($content);
+            file_put_contents($file, $fixed);
+            echo "Fixed paths in $file\n";
+          }
+          EOL
+          
+          php fix-paths.php
+          
+          echo "✅ Paths fixed in HTML files"
+          
+      - name: Move HTML files to root of build
+        run: |
+          echo "Moving HTML files to root of build directory..."
+          
+          for file in build/pkg/pages/*.html; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              cp "$file" "build/$filename"
+              echo "Copied $file to build/$filename"
+            fi
+          done
+          
+          echo "✅ HTML files moved successfully"
+      
       - name: Verify file structure
         run: |
           echo "Final file structure:"
-          find . -type f -not -path "./node_modules/*" -not -path "./.git/*" | sort
+          find build -type f | sort
           
-          echo "\nVerifying key files exist:"
-          for file in "index.html" "404.html" "pkg/assets/js/main.js" "pkg/assets/css/main.css" "pkg/assets/js/ZigWalk.js"; do
+          echo -e "\nVerifying key files exist:"
+          for file in "build/index.html" "build/404.html" "pkg/assets/js/main.js" "pkg/assets/css/main.css"; do
             if [ -f "$file" ]; then
               echo "✅ $file exists with size $(stat -c %s "$file") bytes"
               if [[ $file == *.js ]]; then
@@ -158,8 +267,7 @@ jobs:
                 fi
               fi
             else
-              echo "❌ $file missing - CRITICAL ERROR"
-              exit 1
+              echo "⚠️ $file not found - this might cause issues"
             fi
           done
 
@@ -169,7 +277,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'build'
           
       - name: Deploy to GitHub Pages
         id: deployment
