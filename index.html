@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ziggy</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="pkg/assets/css/main.css">
+    <link rel="stylesheet" href="pkg/assets/css/additions.css">
+    <script src="pkg/assets/js/main.js" defer></script>
+    <script src="pkg/assets/js/dropdown.js" defer></script>
+    <script src="pkg/assets/js/animations.js" defer></script>
+    <style>
+        .cat-mood-section {
+            background-color: #90a0b3;
+            padding: 2rem 0;
+            color: #333;
+        }
+        .cat-mood-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cat-fact {
+            flex: 1;
+            min-width: 300px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .cat-mood {
+            flex: 1;
+            min-width: 300px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .paw-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        .fact-title, .mood-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: #555;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">ZIGGY<span>!</span></a>
+            
+            <div class="hamburger">
+                <span>☰</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="pkg/pages/about.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="pkg/pages/pictures.html" class="nav-link">Pictures</a></li>
+                <li class="nav-item"><a href="pkg/pages/FlappyZig.html" class="nav-link">Flappy Zig</a></li>
+                <!-- <li class="nav-item"><a href="pkg/pages/znek.html" class="nav-link">Znek</a></li> -->
+                <li class="nav-item"><a href="pkg/pages/ZigWalk.html" class="nav-link">ZigWalk</a></li>
+            </ul>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <h1>Meet Ziggy!</h1>
+            <p>Welcome to the official website of Ziggy!</p>
+            <img src="pkg/assets/images/z1.png" alt="Ziggy the Cat" class="hero-img">
+        </div>
+    </section>
+    
+    <section class="cat-mood-section">
+        <div class="container cat-mood-container">
+            <div class="cat-fact">
+                <div class="fact-title"><span class="paw-icon">🐾</span> Gray Cat Fact of the Day</div>
+                <p>Many gray long-haired cats have a naturally playful but gentle temperament.</p>
+                <p><small>Refresh the page for a new fact!</small></p>
+            </div>
+            <div class="cat-mood">
+                <div class="mood-title"><span class="paw-icon">😸</span> Ziggy's Friday Mood</div>
+                <p>Zooming around the house at midnight</p>
+                <p>It's afternoon play time! Ziggy is chasing toys around the house.</p>
+                <p><small>Current cat time: 5:05 pm</small></p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">What Makes Ziggy Special</h2>
+            <div class="card-container">
+                <div class="card">
+                    <img src="pkg/assets/images/z7.png" alt="Ziggy playing">
+                    <div class="card-content">
+                        <h3 class="card-title">Playful Spirit</h3>
+                        <p>Ziggy loves to chase toys and pounce on anything that moves.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <img src="pkg/assets/images/z10.png" alt="Ziggy napping">
+                    <div class="card-content">
+                        <h3 class="card-title">Nap Master</h3>
+                        <p>Finding the sunniest spots for the perfect cat nap is Ziggy's specialty.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <img src="pkg/assets/images/z4.png" alt="Ziggy being curious">
+                    <div class="card-content">
+                        <h3 class="card-title">Curious Explorer</h3>
+                        <p>No box, bag, or shelf is safe from Ziggy's curious investigations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="section" style="background-color: #f0f0f0;">
+        <div class="container" style="text-align: center;">
+            <h2 class="section-title">Click the gift!</h2>
+            <p>👇🏼</p>
+            <button id="myButton" class="btn">🎁</button>
+            <div id="result"></div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <ul class="footer-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="pkg/pages/about.html">About</a></li>
+                <li><a href="pkg/pages/pictures.html">Pictures</a></li>
+                <li><a href="pkg/pages/FlappyZig.html">Flappy Zig</a></li>
+                <!-- <li><a href="pkg/pages/znek.html">Znek</a></li> -->
+                <li><a href="pkg/pages/ZigWalk.html">ZigWalk</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>
