@@ -81,19 +81,24 @@ jobs:
           mkdir -p pkg/assets/js
           echo "Compiling TypeScript files..."
           
-          # First try standard tsc compilation
+          echo "Running TSC with full configuration..."
           npx tsc
           
-          # Check if compilation succeeded
           if [ $? -ne 0 ]; then
             echo "TypeScript compilation failed with tsc. Trying alternative method."
             
-            # Fallback method: compile each TS file individually
             find ./pkg/assets/ts -name "*.ts" | while read -r file; do
               echo "Individually compiling $file"
               outfile="./pkg/assets/js/$(basename "${file%.ts}.js")"
               outdir=$(dirname "$outfile")
               mkdir -p "$outdir"
+              
+              if [ -f "$outfile" ]; then
+                echo "Removing existing file: $outfile"
+                rm "$outfile"
+              fi
+              
+              echo "Compiling $file to $outfile..."
               npx tsc "$file" --outDir "$outdir" --target ES6 --module ES2020
             done
           fi
@@ -103,41 +108,78 @@ jobs:
           echo "Generated JavaScript files:"
           find ./pkg/assets/js -name "*.js" | sort
           
-          # Check for any missing outputs
           ts_files=$(find ./pkg/assets/ts -name "*.ts" | wc -l)
           js_files=$(find ./pkg/assets/js -name "*.js" | wc -l)
           echo "TypeScript files count: $ts_files"
           echo "JavaScript files count: $js_files"
           
-          # Special handling for critical files
           for critical_file in "Znek" "FlappyZig" "main" "ZigWalk" "dropdown" "animations"; do
             if [ -f "./pkg/assets/ts/${critical_file}.ts" ] && [ ! -f "./pkg/assets/js/${critical_file}.js" ]; then
               echo "⚠️ Critical file missing: ${critical_file}.js - attempting direct compilation"
               npx tsc ./pkg/assets/ts/${critical_file}.ts --outFile ./pkg/assets/js/${critical_file}.js --target ES6 --module None
+            elif [ -f "./pkg/assets/js/${critical_file}.js" ]; then
+              echo "✅ Critical file exists: ./pkg/assets/js/${critical_file}.js"
+              ls -la "./pkg/assets/js/${critical_file}.js"
+              echo "File content preview (first 5 lines):"
+              head -n 5 "./pkg/assets/js/${critical_file}.js"
+            else
+              echo "⚠️ Critical TS file not found: ./pkg/assets/ts/${critical_file}.ts"
             fi
           done
           
-      - name: Lint JavaScript
+      - name: Minify JavaScript with timestamp versioning
         run: |
-          npx eslint pkg/assets/js/*.js --fix || true
+          BUILD_TIMESTAMP=$(date +%s)
+          echo "Using build timestamp: $BUILD_TIMESTAMP for versioning"
           
-      - name: Minify JavaScript
-        run: |
           find ./pkg/assets/js -name "*.js" | while read -r file; do
             if [ -f "$file" ]; then
               echo "Minifying $file"
-              npx terser "$file" \
+              
+              cp "$file" "${file}.backup"
+              
+              echo "/* Build: ${BUILD_TIMESTAMP} - $(date) */" > "${file}.versioned"
+              cat "${file}.backup" >> "${file}.versioned"
+              
+              npx terser "${file}.versioned" \
                 --compress \
                 --mangle \
-                --output "${file%.js}.min.js"
-              if [ -f "${file%.js}.min.js" ]; then
-                mv "${file%.js}.min.js" "$file"
-                echo "✅ Successfully minified $file"
+                --output "${file}.min.js"
+                
+              if [ -f "${file}.min.js" ]; then
+                echo "/* Build: ${BUILD_TIMESTAMP} - $(date) */" > "${file}.temp"
+                cat "${file}.min.js" >> "${file}.temp"
+                mv "${file}.temp" "$file"
+                
+                echo "✅ Successfully minified and versioned $file"
+                head -n 3 "$file"
+                
+                rm -f "${file}.versioned" "${file}.backup" "${file}.min.js"
               else
-                echo "⚠️ Warning: Minification of $file may have failed, keeping original"
+                echo "⚠️ Warning: Minification of $file failed, keeping original"
+                mv "${file}.backup" "$file"
+                rm -f "${file}.versioned"
               fi
             fi
           done
+      
+      - name: Verify ZigWalk.js specifically
+        run: |
+          ZIGWALK_FILE="./pkg/assets/js/ZigWalk.js"
+          if [ -f "$ZIGWALK_FILE" ]; then
+            echo "ZigWalk.js exists and has size:"
+            ls -la "$ZIGWALK_FILE"
+            
+            if [ -f "./pkg/pages/ZigWalk.php.html" ]; then
+              echo "Adding no-cache meta tags to ZigWalk.php.html"
+              sed -i 's/<head>/<head>\n    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" \/>\n    <meta http-equiv="Pragma" content="no-cache" \/>\n    <meta http-equiv="Expires" content="0" \/>/' "./pkg/pages/ZigWalk.php.html"
+            fi
+            
+            find . -name "*.html" -type f -exec sed -i "s/ZigWalk.js/ZigWalk.js?v=$(date +%s)/g" {} \;
+          else
+            echo "❌ CRITICAL ERROR: ZigWalk.js does not exist!"
+            exit 1
+          fi
           
       - name: Process PHP files
         run: |
@@ -156,90 +198,16 @@ jobs:
           echo "Verifying conversion - HTML files created:"
           find . -type f -name "*.html" | grep -v "node_modules" | sort
           
-          # Don't remove PHP files yet - keep them for reference
-          # find . -type f -name "*.php" -delete
-          
-      - name: Compile Sass
+      - name: Fix paths in HTML files with cache busting
         run: |
-          mkdir -p pkg/assets/css
-          echo "Compiling all SCSS files..."
+          CACHE_BUSTER=$(date +%s)
           
-          # Find all SCSS files and compile them
-          find ./pkg/assets/sass -name "*.scss" | while read -r scss_file; do
-            # Get relative path of the SCSS file within the sass directory
-            rel_path=$(echo "$scss_file" | sed 's|./pkg/assets/sass/||')
-            # Create the output path in the css directory
-            css_file="./pkg/assets/css/${rel_path%.scss}.css"
-            # Create directory for output file if it doesn't exist
-            mkdir -p "$(dirname "$css_file")"
-            
-            echo "Compiling $scss_file to $css_file"
-            sass "$scss_file":"$css_file" --style=compressed
-            
-            if [ -f "$css_file" ]; then
-              echo "✅ Successfully compiled $scss_file to $css_file"
-            else
-              echo "❌ Failed to compile $scss_file"
-            fi
-          done
+          find . -name "*.html" -type f -exec sed -i "s/href=\"\\([^\"]*\\)\\.php\"/href=\"\\1.php.html\"/g" {} \;
+          find . -name "*.html" -type f -exec sed -i "s/action=\"\\([^\"]*\\)\\.php\"/action=\"\\1.php.html\"/g" {} \;
+          find . -name "*.html" -type f -exec sed -i "s/src=\"\\([^\"]*\\)\\.js\"/src=\"\\1.js?v=$CACHE_BUSTER\"/g" {} \;
+          find . -name "*.html" -type f -exec sed -i "s/href=\"\\([^\"]*\\)\\.css\"/href=\"\\1.css?v=$CACHE_BUSTER\"/g" {} \;
           
-          # Verify CSS outputs
-          echo "Generated CSS files:"
-          find ./pkg/assets/css -name "*.css" | sort
-          
-      - name: Create 404 page
-        run: |
-          if [ ! -f "404.html" ]; then
-            echo '<!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <title>404 - Page Not Found | Ziggy</title>
-                <link rel="stylesheet" href="pkg/assets/css/main.css">
-                <style>
-                    body { display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-                    .container { max-width: 600px; padding: 20px; }
-                    h1 { color: var(--primary-color); }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>404 - Page Not Found</h1>
-                    <p>Sorry, but the page you were looking for could not be found.</p>
-                    <a href="index.html" class="btn">Return Home</a>
-                </div>
-            </body>
-            </html>' > 404.html
-            echo "✅ Created 404.html page"
-          fi
-
-      - name: Ensure index.html exists
-        run: |
-          if [ ! -f "index.html" ]; then
-            if [ -f "index.php.html" ]; then
-              cp index.php.html index.html
-              echo "✅ Copied index.php.html to index.html"
-            else
-              echo '<!DOCTYPE html>
-              <html>
-              <head>
-                  <meta charset="utf-8">
-                  <title>Welcome to Ziggy</title>
-                  <meta http-equiv="refresh" content="0;url=index.php.html">
-              </head>
-              <body>
-                  <p>Redirecting to <a href="index.php.html">homepage</a>...</p>
-              </body>
-              </html>' > index.html
-              echo "✅ Created redirect index.html"
-            fi
-          fi
-
-      - name: Fix paths in HTML files
-        run: |
-          # Optional: Fix any paths in HTML files that might be broken after PHP conversion
-          find . -name "*.html" -type f -exec sed -i 's/href="\([^"]*\)\.php"/href="\1.php.html"/g' {} \;
-          find . -name "*.html" -type f -exec sed -i 's/action="\([^"]*\)\.php"/action="\1.php.html"/g' {} \;
+          echo "Added cache busting with timestamp: $CACHE_BUSTER"
           
       - name: Verify file structure
         run: |
@@ -247,11 +215,19 @@ jobs:
           find . -type f -not -path "./node_modules/*" -not -path "./.git/*" | sort
           
           echo "\nVerifying key files exist:"
-          for file in "index.html" "404.html" "pkg/assets/js/main.js" "pkg/assets/css/main.css"; do
+          for file in "index.html" "404.html" "pkg/assets/js/main.js" "pkg/assets/css/main.css" "pkg/assets/js/ZigWalk.js"; do
             if [ -f "$file" ]; then
-              echo "✅ $file exists"
+              echo "✅ $file exists with size $(stat -c %s "$file") bytes"
+              if [[ $file == *.js ]]; then
+                LINES=$(wc -l < "$file")
+                echo "   - File has $LINES lines of code"
+                if [ $LINES -lt 5 ]; then
+                  echo "   ⚠️ WARNING: File seems too small, might be empty or corrupt"
+                fi
+              fi
             else
-              echo "❌ $file missing"
+              echo "❌ $file missing - CRITICAL ERROR"
+              exit 1
             fi
           done
           
