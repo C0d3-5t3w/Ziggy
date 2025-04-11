@@ -82,12 +82,19 @@ jobs:
           if command -v tsc >/dev/null 2>&1; then
             echo "Compiling TypeScript files..."
             mkdir -p pkg/assets/js
-            tsc pkg/assets/ts/main.ts --outDir pkg/assets/js --target es5
-            tsc pkg/assets/ts/Znek.ts --outDir pkg/assets/js --target es5
-            tsc pkg/assets/ts/ZigWalk.ts --outDir pkg/assets/js --target es5
-            tsc pkg/assets/ts/FlappyZig.ts --outDir pkg/assets/js --target es5
-            tsc pkg/assets/ts/dropdown.ts --outDir pkg/assets/js --target es5
-            tsc pkg/assets/ts/animations.ts --outDir pkg/assets/js --target es5
+            # Use tsconfig.json for compilation instead of individual commands
+            npx tsc --project tsconfig.json
+            
+            # Fallback to individual compilation if project compilation fails
+            if [ $? -ne 0 ]; then
+              echo "Trying individual file compilation..."
+              tsc pkg/assets/ts/main.ts --outDir pkg/assets/js --target es2015
+              tsc pkg/assets/ts/Znek.ts --outDir pkg/assets/js --target es2015
+              tsc pkg/assets/ts/ZigWalk.ts --outDir pkg/assets/js --target es2015
+              tsc pkg/assets/ts/FlappyZig.ts --outDir pkg/assets/js --target es2015
+              tsc pkg/assets/ts/dropdown.ts --outDir pkg/assets/js --target es2015
+              tsc pkg/assets/ts/animations.ts --outDir pkg/assets/js --target es2015
+            fi
           else
             echo "TypeScript compiler not found - skipping TS compilation"
           fi
