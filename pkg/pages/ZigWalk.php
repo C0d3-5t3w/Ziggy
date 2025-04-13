@@ -42,6 +42,7 @@ header("timezone: PMT");
             </div>
             <div class="control-row">
                 <button id="mobile-backward" class="mobile-btn">↓</button>
+                <button id="mobile-scratch" class="mobile-btn">SCRATCH</button>
             </div>
         </div>
         <canvas id="game-canvas"></canvas>

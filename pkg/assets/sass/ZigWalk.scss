@@ -222,6 +222,19 @@ html, body {
       letter-spacing: 1px;
       background: linear-gradient(135deg, rgba($accent-color, 0.7), rgba(color.adjust($accent-color, $lightness: -15%), 0.7));
     }
+
+    &#mobile-scratch {
+      width: 120px;
+      border-radius: 35px;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      background: linear-gradient(
+        135deg,
+        rgba($accent-color, 0.7),
+        rgba(color.adjust($accent-color, $lightness: -15%), 0.7)
+      );
+    }
     
     &#mobile-forward, &#mobile-backward {
       margin: 0;
@@ -314,7 +327,7 @@ html, body {
 #fps-counter {
   position: absolute;
   top: 20px;
-  right: 20px;
+  left: 20px;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
   background: rgba(0, 0, 0, 0.5);

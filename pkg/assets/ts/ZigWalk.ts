@@ -759,6 +759,8 @@ class ZigWalk {
   private particles: Particle[] = [];
   private birds: Bird[] = [];
   private squirrels: Squirrel[] = [];
+  private trails: THREE.Mesh[] = [];
+  private scratchCooldown: boolean = false;
   
   private gameState: GameState = {
     score: 0,
@@ -1092,6 +1094,7 @@ class ZigWalk {
     this.addFlowers();
     this.addBushes();
     this.addPathDetails();
+    this.addTrails();
   }
   
   private addGrassDetails(): void {
@@ -1268,6 +1271,34 @@ class ZigWalk {
     }
   }
   
+  private addTrails(): void {
+    const TRAIL_COUNT = 5;
+    const TRAIL_WIDTH = 2;
+    const TRAIL_LENGTH = GameConfig.WORLD.GROUND_LENGTH;
+    const TRAIL_SPACING = GameConfig.WORLD.GROUND_WIDTH / (TRAIL_COUNT + 1);
+
+    for (let i = 0; i < TRAIL_COUNT; i++) {
+      const trailGeometry = new THREE.PlaneGeometry(TRAIL_WIDTH, TRAIL_LENGTH);
+      const trailMaterial = new THREE.MeshStandardMaterial({
+        color: 0x555555,
+        roughness: 0.9,
+        metalness: 0.1,
+        side: THREE.DoubleSide,
+      });
+
+      const trail = new THREE.Mesh(trailGeometry, trailMaterial);
+      trail.rotation.x = -Math.PI / 2;
+      trail.position.set(
+        -GameConfig.WORLD.GROUND_WIDTH / 2 + TRAIL_SPACING * (i + 1),
+        0.01,
+        -GameConfig.WORLD.GROUND_LENGTH / 2
+      );
+
+      this.trails.push(trail);
+      this.scene.add(trail);
+    }
+  }
+  
   private initPlayer(): void {
     const catGroup = new THREE.Group();
     
@@ -1409,12 +1440,31 @@ class ZigWalk {
           backwardButton.addEventListener('touchstart', () => { this.mobileControls.backward = true; });
           backwardButton.addEventListener('touchend', () => { this.mobileControls.backward = false; });
         }
+
+        const scratchButton = document.createElement('button');
+        scratchButton.id = 'mobile-scratch';
+        scratchButton.classList.add('mobile-btn');
+        scratchButton.textContent = 'SCRATCH';
+        scratchButton.addEventListener('touchstart', () => {
+          if (!this.scratchCooldown) {
+            this.performScratchAttack();
+          }
+        });
+
+        const controlRow = document.querySelector('#mobile-controls .control-row');
+        if (controlRow) {
+          controlRow.appendChild(scratchButton);
+        }
       }
     }
   }
   
   private handleKeyDown(event: KeyboardEvent): void {
     this.keys[event.key] = true;
+
+    if (event.key === 'Shift' && !this.scratchCooldown) {
+      this.performScratchAttack();
+    }
   }
   
   private handleKeyUp(event: KeyboardEvent): void {
@@ -1617,7 +1667,7 @@ class ZigWalk {
         notification.classList.remove('visible');
         setTimeout(() => {
           notification.classList.add('hidden');
-        }, 500);
+        }, GameConfig.UI.LEVEL_UP_DURATION);
       }, GameConfig.UI.LEVEL_UP_DURATION);
     }
   }
@@ -1732,55 +1782,41 @@ class ZigWalk {
           );
         }
       }
-      
-      if (this.checkCollision(this.player, obstacle.mesh)) {
-        this.createParticles(
-          new THREE.Vector3(
-            this.player.position.x,
-            this.player.position.y,
-            this.player.position.z
-          ),
-          0xff5252,
-          20
-        );
-        this.endGame();
-      }
     });
   }
   
   private checkCollision(player: THREE.Object3D, obstacle: THREE.Object3D): boolean {
-    if (this.isEnvironmentItem(obstacle)) {
-      return false;
-    }
-    
-    const playerBox = new THREE.Box3().setFromObject(player);
-    const obstacleBox = new THREE.Box3().setFromObject(obstacle);
-    return playerBox.intersectsBox(obstacleBox);
-  }
-  
-  private isEnvironmentItem(object: THREE.Object3D): boolean {
-    const environmentItems = [
-      ...this.ground.children,
-      ...this.mountains,
-      ...this.clouds
-    ];
-    
-    return environmentItems.some(item => {
-      return object === item || this.isObjectDescendantOf(object, item);
-    });
-  }
-  
-  private isObjectDescendantOf(object: THREE.Object3D, possibleParent: THREE.Object3D): boolean {
-    let currentObj = object.parent;
-    while (currentObj !== null) {
-      if (currentObj === possibleParent) {
-        return true;
-      }
-      currentObj = currentObj.parent;
-    }
     return false;
   }
 
+  private performScratchAttack(): void {
+    this.scratchCooldown = true;
+
+    const scratchEffect = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      new THREE.MeshBasicMaterial({
+        color: 0xff0000,
+        transparent: true,
+        opacity: 0.5,
+      })
+    );
+    scratchEffect.position.set(
+      this.player.position.x,
+      this.player.position.y + 0.5,
+      this.player.position.z - 1
+    );
+    scratchEffect.rotation.x = -Math.PI / 2;
+    this.scene.add(scratchEffect);
+
+    setTimeout(() => {
+      this.scene.remove(scratchEffect);
+    }, 200);
+
+    setTimeout(() => {
+      this.scratchCooldown = false;
+    }, 1000);
+  }
+  
   private showMessage(message: string): void {
     const messageContainer = document.createElement('div');
     messageContainer.innerText = message;
