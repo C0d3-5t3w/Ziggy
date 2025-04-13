@@ -1273,7 +1273,7 @@ class ZigWalk {
   
   private addTrails(): void {
     const TRAIL_COUNT = 5;
-    const TRAIL_WIDTH = 2;
+    const TRAIL_WIDTH = 3;
     const TRAIL_LENGTH = GameConfig.WORLD.GROUND_LENGTH;
     const TRAIL_SPACING = GameConfig.WORLD.GROUND_WIDTH / (TRAIL_COUNT + 1);
 
