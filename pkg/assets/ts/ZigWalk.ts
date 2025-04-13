@@ -257,7 +257,7 @@ namespace GameConfig {
   });
 
   export const VISUALS = Object.freeze({
-    SKY_COLOR: 0x0055ff,
+    SKY_COLOR: 0x87CEEB,
     GROUND_COLOR: 0x3A4C40,
     PLAYER_COLOR: 0xA9A9A9,
     TREE_TRUNK_COLOR: 0x654321,
@@ -845,7 +845,7 @@ class ZigWalk {
   private initScene(): void {
     this.scene = new THREE.Scene();
     
-    const topColor = new THREE.Color(0x0055ff);  
+    const topColor = new THREE.Color(GameConfig.VISUALS.SKY_COLOR);  
     const bottomColor = new THREE.Color(0xaaddff); 
     
     const vertexShader = `
@@ -1636,111 +1636,73 @@ class ZigWalk {
     const movementSpeed = GameConfig.PLAYER.SPEED * deltaTime;
     const currentTime = performance.now();
     const timeSinceLastJump = currentTime - this.gameState.lastJumpTime;
-    
+
     let isMoving = false;
-    this.isBackingUp = false;
-    
+
     const cameraForward = new THREE.Vector3();
     cameraForward.subVectors(this.cameraTargetLookAt, this.camera.position);
     cameraForward.y = 0;
     cameraForward.normalize();
-    
+
     if (this.keys['ArrowLeft'] || this.keys['a'] || this.mobileControls.left) {
-      this.playerTargetRotation += Math.PI / 32; 
+      this.playerTargetRotation += GameConfig.CAMERA.ROTATION_SPEED * deltaTime; 
       isMoving = true;
     } else if (this.keys['ArrowRight'] || this.keys['d'] || this.mobileControls.right) {
-      this.playerTargetRotation -= Math.PI / 32;
+      this.playerTargetRotation -= GameConfig.CAMERA.ROTATION_SPEED * deltaTime; 
       isMoving = true;
     }
-    
-    this.player.rotation.y += (this.playerTargetRotation - this.player.rotation.y) * 0.1;
-    
-    if ((this.keys['ArrowUp'] || this.keys['w'] || this.mobileControls.forward)) {
-      const forwardLimit = -GameConfig.WORLD.GROUND_LENGTH + 20;
+
+    this.player.rotation.y += (this.playerTargetRotation - this.player.rotation.y) * GameConfig.CAMERA.SMOOTHING;
+
+    if (this.keys['ArrowUp'] || this.keys['w'] || this.mobileControls.forward) {
+      const forwardLimit = -GameConfig.WORLD.GROUND_LENGTH / 2 + 5;
       if (this.player.position.z > forwardLimit) {
-        this.player.position.x += cameraForward.x * movementSpeed * 1.2;
-        this.player.position.z += cameraForward.z * movementSpeed * 1.2;
-        
-        this.playerTargetRotation = Math.atan2(cameraForward.x, cameraForward.z);
-        
+        this.player.position.x += cameraForward.x * movementSpeed;
+        this.player.position.z += cameraForward.z * movementSpeed;
         isMoving = true;
       }
     }
-    
-    if ((this.keys['ArrowDown'] || this.keys['s'] || this.mobileControls.backward)) {
-      this.isBackingUp = true;
-      const backwardLimit = 5;
-      
-      const newX = this.player.position.x - cameraForward.x * movementSpeed * 0.8;
-      const newZ = this.player.position.z - cameraForward.z * movementSpeed * 0.8;
-      
-      if (newZ < backwardLimit) {
-        this.player.position.x = newX;
-        this.player.position.z = newZ;
-        
-        this.playerTargetRotation = Math.atan2(-cameraForward.x, -cameraForward.z);
-        
+
+    if (this.keys['ArrowDown'] || this.keys['s'] || this.mobileControls.backward) {
+      const backwardLimit = GameConfig.WORLD.GROUND_LENGTH / 2 - 5;
+      if (this.player.position.z < backwardLimit) {
+        this.player.position.x -= cameraForward.x * movementSpeed;
+        this.player.position.z -= cameraForward.z * movementSpeed;
         isMoving = true;
       }
     }
-    
+
     if (this.player.position.x < GameConfig.WORLD.BOUNDARY_LEFT) {
       this.player.position.x = GameConfig.WORLD.BOUNDARY_LEFT;
     } else if (this.player.position.x > GameConfig.WORLD.BOUNDARY_RIGHT) {
       this.player.position.x = GameConfig.WORLD.BOUNDARY_RIGHT;
     }
-    
+
     if (isMoving && !this.gameState.playerJumping && this.player.position.y <= GameConfig.PLAYER.START_Y + 0.1) {
       const bobHeight = Math.sin(performance.now() * 0.015) * 0.05;
       this.player.position.y = GameConfig.PLAYER.START_Y + bobHeight;
     }
-    
-    const canJump = !this.gameState.playerJumping && 
-                   this.player.position.y <= GameConfig.PLAYER.START_Y + 0.1 &&
-                   timeSinceLastJump > GameConfig.PLAYER.JUMP_COOLDOWN;
-    
+
+    const canJump = !this.gameState.playerJumping &&
+                    this.player.position.y <= GameConfig.PLAYER.START_Y + 0.1 &&
+                    timeSinceLastJump > GameConfig.PLAYER.JUMP_COOLDOWN;
+
     if ((this.keys[' '] || this.mobileControls.jump) && canJump) {
       this.jumpVelocity = GameConfig.PHYSICS.JUMP_FORCE;
       this.gameState.playerJumping = true;
       this.gameState.lastJumpTime = currentTime;
-      this.mobileControls.jump = false; 
+      this.mobileControls.jump = false;
     }
-    
+
     if (this.gameState.playerJumping || this.player.position.y > GameConfig.PLAYER.START_Y) {
       this.player.position.y += this.jumpVelocity * deltaTime;
       this.jumpVelocity -= GameConfig.PHYSICS.GRAVITY * deltaTime;
-      
+
       if (this.player.position.y <= GameConfig.PLAYER.START_Y && this.jumpVelocity < 0) {
         this.player.position.y = GameConfig.PLAYER.START_Y;
         this.jumpVelocity = 0;
         this.gameState.playerJumping = false;
       }
-    }
-    
-    if (this.gameState.playerJumping && this.jumpVelocity > 0) {
-      if (Math.random() > 0.7) {
-        this.createParticles(
-          new THREE.Vector3(
-            this.player.position.x,
-            this.player.position.y - 0.5,
-            this.player.position.z
-          ),
-          0xeeeeee,
-          3
-        );
-      }
-    }
-    
-    if (this.player.position.y <= GameConfig.PLAYER.START_Y && this.jumpVelocity < -0.1) {
-      this.createParticles(
-        new THREE.Vector3(
-          this.player.position.x,
-          GameConfig.PLAYER.START_Y,
-          this.player.position.z
-        ),
-        0xcccccc,
-        10
-      );
     }
   }
   
@@ -1962,42 +1924,28 @@ class ZigWalk {
   
   private updateCamera(): void {
     const angle = this.player.rotation.y;
-    
-    let offsetX = Math.sin(angle) * -GameConfig.CAMERA.DISTANCE;
-    let offsetZ = Math.cos(angle) * -GameConfig.CAMERA.DISTANCE;
-    
-    let lookAheadX = Math.sin(angle) * GameConfig.CAMERA.LOOK_AHEAD;
-    let lookAheadZ = Math.cos(angle) * GameConfig.CAMERA.LOOK_AHEAD;
-    
-    if (this.isBackingUp) {
-      lookAheadX = Math.sin(angle + Math.PI) * GameConfig.CAMERA.LOOK_AHEAD * 0.5;
-      lookAheadZ = Math.cos(angle + Math.PI) * GameConfig.CAMERA.LOOK_AHEAD * 0.5;
-    }
-    
+
+    const offsetX = Math.sin(angle) * -GameConfig.CAMERA.DISTANCE;
+    const offsetZ = Math.cos(angle) * -GameConfig.CAMERA.DISTANCE;
+
+    const lookAheadX = Math.sin(angle) * GameConfig.CAMERA.LOOK_AHEAD;
+    const lookAheadZ = Math.cos(angle) * GameConfig.CAMERA.LOOK_AHEAD;
+
     const idealPosition = new THREE.Vector3(
       this.player.position.x + offsetX,
       this.player.position.y + GameConfig.CAMERA.HEIGHT,
       this.player.position.z + offsetZ
     );
-    
+
     const idealLookAt = new THREE.Vector3(
       this.player.position.x + lookAheadX,
       this.player.position.y + 1,
       this.player.position.z + lookAheadZ
     );
-    
-    if (!this.cameraTargetPosition.equals(new THREE.Vector3(0, 0, 0))) {
-      const smoothing = this.isBackingUp ? 
-        GameConfig.CAMERA.SMOOTHING * 1.5 : 
-        GameConfig.CAMERA.SMOOTHING;
-        
-      this.cameraTargetPosition.lerp(idealPosition, smoothing);
-      this.cameraTargetLookAt.lerp(idealLookAt, smoothing);
-    } else {
-      this.cameraTargetPosition.copy(idealPosition);
-      this.cameraTargetLookAt.copy(idealLookAt);
-    }
-    
+
+    this.cameraTargetPosition.lerp(idealPosition, GameConfig.CAMERA.SMOOTHING);
+    this.cameraTargetLookAt.lerp(idealLookAt, GameConfig.CAMERA.SMOOTHING);
+
     this.camera.position.copy(this.cameraTargetPosition);
     this.camera.lookAt(this.cameraTargetLookAt);
   }
