@@ -230,10 +230,10 @@ namespace GameConfig {
   });
 
   export const WORLD = Object.freeze({
-    BOUNDARY_LEFT: -50,
-    BOUNDARY_RIGHT: 50,
-    GROUND_WIDTH: 300,
-    GROUND_LENGTH: 300,
+    BOUNDARY_LEFT: -500,
+    BOUNDARY_RIGHT: 500,
+    GROUND_WIDTH: 500,
+    GROUND_LENGTH: 500,
     MOUNTAIN_COUNT: 40,
     CLOUD_COUNT: 80,
     FLOWER_COUNT: 800,
@@ -249,7 +249,7 @@ namespace GameConfig {
   export const OBSTACLES = Object.freeze({
     COUNT: 20,
     ZONE_MIN: 20,
-    ZONE_MAX: 200,
+    ZONE_MAX: 1000,
     BASE_SPEED: 0.2,
     SPEED_INCREMENT: 0.05,
     POINTS_PER_OBSTACLE: 10,
